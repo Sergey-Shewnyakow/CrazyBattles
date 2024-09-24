@@ -1,6 +1,119 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+
+class ImageCarousel extends StatefulWidget {
+  final List<String> imageAssets; // Список адресов изображений
+  final int sectionNumber; // Номер раздела для формирования айди карты
+
+  const ImageCarousel({
+    super.key,
+    required this.imageAssets,
+    required this.sectionNumber,
+  });
+
+  @override
+  _ImageCarouselState createState() => _ImageCarouselState();
+}
+
+class _ImageCarouselState extends State<ImageCarousel> {
+  int _currentImageIndex = 0; // Индекс текущего изображения
+  final CarouselSliderController _carouselController = CarouselSliderController(); // Создаем контроллер
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 80),
+          child: CarouselSlider(
+            carouselController: _carouselController, // Передаем контроллер
+            items: widget.imageAssets.map((imageAsset) {
+              return Builder(
+                builder: (BuildContext context) {
+                  return Container(
+                    width: 550*0.643, // Ширина экрана
+                    margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                          imageAsset,
+                        ),
+                      ),
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          // TODO: выбор карточки по нажатию
+                        });
+                      },
+                      child: Container(
+                        decoration: const BoxDecoration(),
+                      )
+                    ),
+                  );
+                },
+              );
+            }).toList(),
+            options: CarouselOptions(
+              height: 550.0, // Высота карусели
+              viewportFraction: 1.0, // Занимает всю ширину экрана
+              enlargeCenterPage: false, // Без увеличения центрального изображения
+              onPageChanged: (index, reason) {
+                setState(() {
+                  _currentImageIndex = index;
+                });
+              },
+            ),
+          ),
+        ),
+        // Стрелка влево
+        Positioned(
+          left: 25.0,
+          top: 400.0,
+          child: IconButton(
+            onPressed: () {
+              _carouselController.previousPage( // Используем контроллер
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            },
+            icon: const Icon(Icons.arrow_back_ios, size: 40.0),
+          ),
+        ),
+        // Стрелка вправо
+        Positioned(
+          right: 25.0,
+          top: 400.0,
+          child: IconButton(
+            onPressed: () {
+              _carouselController.nextPage( // Используем контроллер
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            },
+            icon: const Icon(Icons.arrow_forward_ios, size: 40.0),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: Text(
+              '${_currentImageIndex + 1}/${widget.imageAssets.length}', // Номер изображения
+              style: const TextStyle(
+                fontSize: 27,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 // Модель карты
 class CardModel {
@@ -73,42 +186,42 @@ class GameModel {
 
 // Карты персонажей
 List<CardModel> characterCards = [
+  CardModel(name: "Роман Аксенов", cardClass: "Саппорт", skill: "Поиск слушателей", ultimate: "Скороговорка", passiveSkill: "Ловкая махинация"),
+  CardModel(name: "Владислав Лайхтман", cardClass: "Саппорт", skill: "ПП-шечка", ultimate: "Трудности саппорта", passiveSkill: "Модный приговор"),
+  CardModel(name: "Ксения Лелюх", cardClass: "Саппорт", skill: "Вор очаровашка", ultimate: "Пуленепробиваемость", passiveSkill: "Каждый сам за себя"),
+  CardModel(name: "Алеся Лопаткова", cardClass: "Саппорт", skill: "Дубайский подарок", ultimate: "Мышеловка", passiveSkill: "Сила дружбы"),
+  CardModel(name: "Мария Николаева", cardClass: "Саппорт", skill: "Дизайнерское решение", ultimate: "Изысканный вкус", passiveSkill: "Помощь ближнему"),
+  CardModel(name: "Диана Плыгун", cardClass: "Саппорт", skill: "Ты в тренде", ultimate: "Роковая улыбка", passiveSkill: "Вечно в тонусе"),
+  CardModel(name: "Никита Трошин", cardClass: "Саппорт", skill: "Вести за собой", ultimate: "Perfecto", passiveSkill: "Помощь на века"),
+  CardModel(name: "Анастасия Чижова", cardClass: "Дамаггер", skill: "Надменный жест", ultimate: "Полная антисанитария", passiveSkill: "Травля"),
+  CardModel(name: "Полина Евстафьева", cardClass: "Дамаггер", skill: "Тебя к телефону", ultimate: "Время - деньги", passiveSkill: "Лёгкое усиление"),
   CardModel(name: "Софья Фефелова", cardClass: "Дамаггер", skill: "Больше пресса", ultimate: "Ну и кадр!", passiveSkill: "По образу и подобию"),
   CardModel(name: "Денис Кольцов", cardClass: "Дамаггер", skill: "Око за око", ultimate: "Токсичность", passiveSkill: "Легкая добыча"),
   CardModel(name: "Михаил Лёвкин", cardClass: "Дамаггер", skill: "Бальный бумеранг", ultimate: "Танец смерти", passiveSkill: "Искра разрушения"),
-  CardModel(name: "Анастасия Чижова", cardClass: "Дамаггер", skill: "Надменный жест", ultimate: "Полная антисанитария", passiveSkill: "Травля"),
   CardModel(name: "Анастасия Сирина", cardClass: "Дамаггер", skill: "Лидер долгов", ultimate: "Неизвестность", passiveSkill: "Расширение территории"),
-  CardModel(name: "Полина Евстафьева", cardClass: "Дамаггер", skill: "Тебя к телефону", ultimate: "Время - деньги", passiveSkill: "Лёгкое усиление"),
   CardModel(name: "Эдвард Сон", cardClass: "Дамаггер", skill: "Музыкальная лотерея", ultimate: "Идеальное звучание", passiveSkill: "Нотный разлад"),
-  CardModel(name: "Денис Федоров", cardClass: "Щитовик", skill: "Один вам, один мне", ultimate: "Всё на кон", passiveSkill: "Чувство меры"),
-  CardModel(name: "Филипп Воробьев", cardClass: "Щитовик", skill: "Беззвучный режим", ultimate: "Терпит-терпит, а потом терпит-терпит", passiveSkill: "Бывалый"),
-  CardModel(name: "Михаил Дрофичев", cardClass: "Щитовик", skill: "Если драка неизбежна...", ultimate: "Любимчик", passiveSkill: "Копилка"),
-  CardModel(name: "Владислав Горбунов", cardClass: "Щитовик", skill: "Опасные игры", ultimate: "Лютая защита", passiveSkill: "Зеркало"),
-  CardModel(name: "Данил Агафонов", cardClass: "Щитовик", skill: "Удар по больному", ultimate: "Бьёшь, как девчонка", passiveSkill: "Кешбэк"),
-  CardModel(name: "Даниил Архипенков", cardClass: "Щитовик", skill: "Легендарные строки", ultimate: "Вечеринка с бассейном", passiveSkill: "Помощь слабым"),
-  CardModel(name: "Дарья Кучер", cardClass: "Щитовик", skill: "Позитивный настрой", ultimate: "+вайб", passiveSkill: "Заряд энергии"),
+  CardModel(name: "Владислав Бадмаев", cardClass: "Хиллер", skill: "Сладкоешка", ultimate: "Беречь до последнего", passiveSkill: "Поняшимся?"),
   CardModel(name: "Артём Ледовских", cardClass: "Хиллер", skill: "Мальчик, который выжил", ultimate: "Иллюзия века", passiveSkill: "Помощь друга"),
+  CardModel(name: "Полина Пермякова", cardClass: "Хиллер", skill: "Кошачья лапка", ultimate: "Мурчащая мелодия", passiveSkill: "Девять жизней"),
+  CardModel(name: "Даниил Рябов", cardClass: "Хиллер", skill: "Приказ", ultimate: "Капитан корабля", passiveSkill: "Сила воли"),
+  CardModel(name: "Руфина Шарипова", cardClass: "Хиллер", skill: "Сплетня", ultimate: "Сладкая подмога", passiveSkill: "Крепкий орешек"),
   CardModel(name: "Сергей Шевняков", cardClass: "Хиллер", skill: "Кнут и пряник", ultimate: "Подмена", passiveSkill: "Исцеляющая легкость"),
   CardModel(name: "Александр Звездаков", cardClass: "Хиллер", skill: "Мемология", ultimate: "Душевное равновесие", passiveSkill: "Сила господа"),
-  CardModel(name: "Руфина Шарипова", cardClass: "Хиллер", skill: "Сплетня", ultimate: "Сладкая подмога", passiveSkill: "Крепкий орешек"),
-  CardModel(name: "Владислав Бадмаев", cardClass: "Хиллер", skill: "Сладкоешка", ultimate: "Беречь до последнего", passiveSkill: "Поняшимся?"),
-  CardModel(name: "Даниил Рябов", cardClass: "Хиллер", skill: "Приказ", ultimate: "Капитан корабля", passiveSkill: "Сила воли"),
-  CardModel(name: "Полина Пермякова", cardClass: "Хиллер", skill: "Кошачья лапка", ultimate: "Мурчащая мелодия", passiveSkill: "Девять жизней"),
-  CardModel(name: "Ксения Лелюх", cardClass: "Саппорт", skill: "Вор очаровашка", ultimate: "Пуленепробиваемость", passiveSkill: "Каждый сам за себя"),
-  CardModel(name: "Владислав Лайхтман", cardClass: "Саппорт", skill: "ПП-шечка", ultimate: "Трудности саппорта", passiveSkill: "Модный приговор"),
-  CardModel(name: "Диана Плыгун", cardClass: "Саппорт", skill: "Ты в тренде", ultimate: "Роковая улыбка", passiveSkill: "Вечно в тонусе"),
-  CardModel(name: "Алеся Лопаткова", cardClass: "Саппорт", skill: "Дубайский подарок", ultimate: "Мышеловка", passiveSkill: "Сила дружбы"),
-  CardModel(name: "Никита Трошин", cardClass: "Саппорт", skill: "Вести за собой", ultimate: "Perfecto", passiveSkill: "Помощь на века"),
-  CardModel(name: "Роман Аксенов", cardClass: "Саппорт", skill: "Поиск слушателей", ultimate: "Скороговорка", passiveSkill: "Ловкая махинация"),
-  CardModel(name: "Мария Николаева", cardClass: "Саппорт", skill: "Дизайнерское решение", ultimate: "Изысканный вкус", passiveSkill: "Помощь ближнему"),
+  CardModel(name: "Данил Агафонов", cardClass: "Щитовик", skill: "Удар по больному", ultimate: "Бьёшь, как девчонка", passiveSkill: "Кешбэк"),
+  CardModel(name: "Даниил Архипенков", cardClass: "Щитовик", skill: "Легендарные строки", ultimate: "Вечеринка с бассейном", passiveSkill: "Помощь слабым"),
+  CardModel(name: "Михаил Дрофичев", cardClass: "Щитовик", skill: "Если драка неизбежна...", ultimate: "Любимчик", passiveSkill: "Копилка"),
+  CardModel(name: "Денис Федоров", cardClass: "Щитовик", skill: "Один вам, один мне", ultimate: "Всё на кон", passiveSkill: "Чувство меры"),
+  CardModel(name: "Владислав Горбунов", cardClass: "Щитовик", skill: "Опасные игры", ultimate: "Лютая защита", passiveSkill: "Зеркало"),
+  CardModel(name: "Дарья Кучер", cardClass: "Щитовик", skill: "Позитивный настрой", ultimate: "+вайб", passiveSkill: "Заряд энергии"),
+  CardModel(name: "Филипп Воробьев", cardClass: "Щитовик", skill: "Беззвучный режим", ultimate: "Терпит-терпит, а потом терпит-терпит", passiveSkill: "Бывалый"),
 ];
 
 // Карты подмоги
 List<CardModel> supportCards = [
-  CardModel(name: "МиМ", cardClass: "Периодическая", isSupport: true),
   CardModel(name: "Мансарда", cardClass: "Постоянная", isSupport: true),
-  CardModel(name: "Твоё шоу", cardClass: "Постоянная", isSupport: true),
+  CardModel(name: "МиМ", cardClass: "Периодическая", isSupport: true),
   CardModel(name: "СВП", cardClass: "Периодическая", isSupport: true),
+  CardModel(name: "Твоё шоу", cardClass: "Постоянная", isSupport: true),
 ];
 
 class CustomBoxShadows {
@@ -178,7 +291,7 @@ class BorderedSocket extends StatelessWidget {
             color: const Color.fromARGB(255, 16, 16, 16),
             borderRadius: BorderRadius.circular(radius+5),
             border: Border.all(
-              color: Color.fromARGB(255, 16, 16, 16),
+              color: const Color.fromARGB(255, 16, 16, 16),
               width: 9,
               strokeAlign: BorderSide.strokeAlignCenter,
             ),
@@ -186,6 +299,7 @@ class BorderedSocket extends StatelessWidget {
             ? CustomBoxShadows.shadowOnBright
             : CustomBoxShadows.shadowOnDark
           ),
+          child: child,
         ),
 
         if (width > 0 && height > 0) DottedBorder(
@@ -335,7 +449,7 @@ class _AutoExpandablePanelState extends State<ExpandablePanel> with SingleTicker
   late AnimationController _controller;
   late Animation<double> _animation;
 
-  bool _isExpanded = false;
+  bool _isExpanded = true;
   bool _isAnimEnded = false;
 
   @override
@@ -898,6 +1012,18 @@ class _CardGameAppState extends State<CardGameApp> {
                           '../assets/images/icoSupport.svg',
                           fit: BoxFit.contain
                         ),
+                        content: const ImageCarousel(
+                          imageAssets: [
+                            '../assets/cards/supports/Aksenov.png',
+                            '../assets/cards/supports/Lahta.png',
+                            '../assets/cards/supports/Leluh.png',
+                            '../assets/cards/supports/Lopatkova.png',
+                            '../assets/cards/supports/Nikolaeva.png',
+                            '../assets/cards/supports/Pligun.png',
+                            '../assets/cards/supports/Troshin.png',
+                          ],
+                          sectionNumber: 0,
+                        ),
                       )
                     : cardsSectionNum == 2 ?
                       ExpandablePanel (
@@ -920,6 +1046,18 @@ class _CardGameAppState extends State<CardGameApp> {
                         title: SvgPicture.asset(
                           '../assets/images/icoDamagger.svg',
                           fit: BoxFit.contain
+                        ),
+                        content: const ImageCarousel(
+                          imageAssets: [
+                            '../assets/cards/damaggers/Chizhova.png',
+                            '../assets/cards/damaggers/Evstafeva.png',
+                            '../assets/cards/damaggers/Fefelova.png',
+                            '../assets/cards/damaggers/Koltsov.png',
+                            '../assets/cards/damaggers/Levkin.png',
+                            '../assets/cards/damaggers/Sirina.png',
+                            '../assets/cards/damaggers/Son.png',
+                          ],
+                          sectionNumber: 1,
                         ),
                       )
                     : cardsSectionNum == 3 ?
@@ -944,6 +1082,18 @@ class _CardGameAppState extends State<CardGameApp> {
                           '../assets/images/icoHealer.svg',
                           fit: BoxFit.contain
                         ),
+                        content: const ImageCarousel(
+                          imageAssets: [
+                            '../assets/cards/healers/Badmaev.png',
+                            '../assets/cards/healers/Ledovskih.png',
+                            '../assets/cards/healers/Permyakova.png',
+                            '../assets/cards/healers/Ryabov.png',
+                            '../assets/cards/healers/Sharipova.png',
+                            '../assets/cards/healers/Shevnyakov.png',
+                            '../assets/cards/healers/Zvezdakov.png',
+                          ],
+                          sectionNumber: 2,
+                        ),
                       )
                     : cardsSectionNum == 4 ?
                       ExpandablePanel (
@@ -966,6 +1116,18 @@ class _CardGameAppState extends State<CardGameApp> {
                         title: SvgPicture.asset(
                           '../assets/images/icoShielder.svg',
                           fit: BoxFit.contain
+                        ),
+                        content: const ImageCarousel(
+                          imageAssets: [
+                            '../assets/cards/shielders/Agafonov.png',
+                            '../assets/cards/shielders/Arhipenkov.png',
+                            '../assets/cards/shielders/Drofichev.png',
+                            '../assets/cards/shielders/Fedorov.png',
+                            '../assets/cards/shielders/Gorbunov.png',
+                            '../assets/cards/shielders/Kucher.png',
+                            '../assets/cards/shielders/Vorobyev.png',
+                          ],
+                          sectionNumber: 3,
                         ),
                       )
                     : cardsSectionNum == 5 ?
@@ -992,6 +1154,15 @@ class _CardGameAppState extends State<CardGameApp> {
                             color: Colors.white,
                             fontSize: 30
                           ),
+                        ),
+                        content: const ImageCarousel(
+                          imageAssets: [
+                            '../assets/cards/adders/Mansarda.png',
+                            '../assets/cards/adders/MiM.png',
+                            '../assets/cards/adders/SVP.png',
+                            '../assets/cards/adders/TSh.png',
+                          ],
+                          sectionNumber: 4,
                         ),
                       )
                     : const SizedBox(),
