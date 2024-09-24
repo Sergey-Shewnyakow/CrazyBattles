@@ -235,7 +235,6 @@ class ExpandablePanel extends StatefulWidget {
   final double minTO;//title offset
   final double maxTO;
   final bool selfActivating;
-  final Function? unload;
   
   const ExpandablePanel({
     super.key,
@@ -253,7 +252,6 @@ class ExpandablePanel extends StatefulWidget {
     this.minTO = 15,
     this.maxTO = 67.5,
     this.selfActivating = false,
-    this.unload,
   });
 
   @override
@@ -293,7 +291,6 @@ class _ExpandablePanelState extends State<ExpandablePanel> {//for class choose p
           onTap: () {
             setState(() {
               setExpand(false);
-              widget.unload!();
             });
           },
           child: _isExpanded ? Container(
@@ -358,8 +355,8 @@ class _AutoExpandablePanelState extends State<ExpandablePanel> with SingleTicker
   @override
   Widget build(BuildContext context) {
     if (_isAnimEnded) {
-      widget.unload!();
-      return const SizedBox.shrink();
+      _CardGameAppState.cardsSectionNum = 0;
+      return widget.background;
     }
 
     return Stack(
@@ -419,7 +416,7 @@ class _CardGameAppState extends State<CardGameApp> {
   GameModel? game;
   bool inLobby = true;
   bool inChooseMode = false;
-  int cardsSectionNum = 0;
+  static int cardsSectionNum = 0;
 
   // Выбранные карты
   List<CardModel> selectedCharacterCards = [];
@@ -476,14 +473,6 @@ class _CardGameAppState extends State<CardGameApp> {
 
   void _dontInteract(CardModel card) {}
 
-  void backToClassChoose() {
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-      setState(() {
-        cardsSectionNum = 0;
-      })
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -505,503 +494,499 @@ class _CardGameAppState extends State<CardGameApp> {
   }
 
   Widget _buildLobby() {
-    return Stack(
-      children: [
-        Container(
-          width: 1080,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 110,
-            vertical: 40,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(height: 124),
-              SizedBox(
-                height: 380,
-                width: 1080,
-                child: Stack(
-                  alignment: Alignment.center,
+    return Expanded(
+      child: Stack(
+        children: [
+          Container(
+            width: 1080,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 110,
+              vertical: 40,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(height: 124),
+                SizedBox(
+                  height: 380,
+                  width: 1080,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        height: 305,
+                        width: 594,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 16, 16, 16),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 315,
+                        width: 495,
+                        child: SvgPicture.asset(
+                          '../assets/images/logo.svg',
+                          fit: BoxFit.contain
+                        ),
+                      ),
+                      const Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.only(bottom: 15),
+                          child: Text(
+                            "БАЛДЕЖНЫЕ БИТВЫ",
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 104, 104, 104),
+                              fontSize: 56.85,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 119),
+                Container(
+                  width: 1080,
+                  margin: const EdgeInsets.only(
+                    left: 25,
+                    right: 35
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 25,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 16, 16, 16),
+                          borderRadius: BorderRadius.circular(51),
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 53, 53, 53),
+                            width: 10,
+                          ),
+                          boxShadow: CustomBoxShadows.shadowOnDark
+                        ),
+                        width: 743,
+                        child: Row(
+                          children: [
+                            Stack(
+                              alignment: AlignmentDirectional.center,
+                              children: [
+                                Image.asset(
+                                  '../assets/images/missing_avatar.jpg',
+                                  width: 167.2,
+                                  height: 167.2,
+                                ),
+                                Container(
+                                  width: 199,
+                                  height: 199,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(35),
+                                    border: Border.all(
+                                      color: const Color.fromARGB(255, 134, 0, 255),
+                                      width: 16,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 40),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "ВЛАД ЛАХТА",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 46.9,
+                                    ),
+                                  ),
+                                  Text(
+                                    "@lahta_vlad",
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 104, 104, 104),
+                                      fontSize: 31.15,
+                                    )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 51),//TODO: локачать шрифт потоньше
+                const Stack(//rating
+                  alignment: AlignmentDirectional.topCenter,
                   children: [
-                    Container(
-                      height: 305,
-                      width: 594,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 16, 16, 16),
-                        borderRadius: BorderRadius.circular(20),
+                    Text(
+                      "РЕЙТИНГ:",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 47.5,
                       ),
                     ),
                     SizedBox(
-                      height: 315,
-                      width: 495,
-                      child: SvgPicture.asset(
-                        '../assets/images/logo.svg',
-                        fit: BoxFit.contain
-                      ),
-                    ),
-                    const Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.only(bottom: 15),
-                        child: Text(
-                          "БАЛДЕЖНЫЕ БИТВЫ",
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 104, 104, 104),
-                            fontSize: 56.85,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 119),
-              Container(
-                width: 1080,
-                margin: const EdgeInsets.only(
-                  left: 25,
-                  right: 35
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 25,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 16, 16, 16),
-                        borderRadius: BorderRadius.circular(51),
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 53, 53, 53),
-                          width: 10,
-                        ),
-                        boxShadow: CustomBoxShadows.shadowOnDark
-                      ),
-                      width: 743,
+                      width: 1080,
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Stack(
-                            alignment: AlignmentDirectional.center,
-                            children: [
-                              Image.asset(
-                                '../assets/images/missing_avatar.jpg',
-                                width: 167.2,
-                                height: 167.2,
-                              ),
-                              Container(
-                                width: 199,
-                                height: 199,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(35),
-                                  border: Border.all(
-                                    color: const Color.fromARGB(255, 134, 0, 255),
-                                    width: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          Icon(
+                            Icons.star_rate,
+                            color: Color.fromARGB(255, 134, 0, 255),
+                            size: 183.79,
                           ),
-                          const SizedBox(width: 40),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "ВЛАД ЛАХТА",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 46.9,
-                                  ),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 40),
+                              child: Text(
+                                "1500",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 183.79,
                                 ),
-                                Text(
-                                  "@lahta_vlad",
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 104, 104, 104),
-                                    fontSize: 31.15,
-                                  )
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
+                  ]
+                ),
+                const SizedBox(height: 18),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    BorderedSocket(radius: 4.59, height: 144.94, width: 93.27),
+                    SizedBox(width: 26),
+                    BorderedSocket(radius: 6.82, height: 215.64, width: 138.77),
+                    SizedBox(width: 26),
+                    BorderedSocket(radius: 6.82, height: 215.64, width: 138.77),
+                    SizedBox(width: 26),
+                    BorderedSocket(radius: 6.82, height: 215.64, width: 138.77),
+                    SizedBox(width: 26),
+                    BorderedSocket(radius: 4.59, height: 144.94, width: 93.27),
                   ],
                 ),
-              ),
-              const SizedBox(height: 51),//TODO: локачать шрифт потоньше
-              const Stack(//rating
-                alignment: AlignmentDirectional.topCenter,
-                children: [
-                  Text(
-                    "РЕЙТИНГ:",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 47.5,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 1080,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.star_rate,
-                          color: Color.fromARGB(255, 134, 0, 255),
-                          size: 183.79,
-                        ),
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 40),
-                            child: Text(
-                              "1500",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 183.79,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ]
-              ),
-              const SizedBox(height: 18),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  BorderedSocket(radius: 4.59, height: 144.94, width: 93.27),
-                  SizedBox(width: 26),
-                  BorderedSocket(radius: 6.82, height: 215.64, width: 138.77),
-                  SizedBox(width: 26),
-                  BorderedSocket(radius: 6.82, height: 215.64, width: 138.77),
-                  SizedBox(width: 26),
-                  BorderedSocket(radius: 6.82, height: 215.64, width: 138.77),
-                  SizedBox(width: 26),
-                  BorderedSocket(radius: 4.59, height: 144.94, width: 93.27),
-                ],
-              ),
-              const SizedBox(height: 65),
-            ],
+                const SizedBox(height: 65),
+              ],
+            ),
           ),
-        ),
-        SizedBox(
-          height: 1920,
-          width: 1080,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned(
-                left: 176,
-                top: 1583.86,
-                height: 130.81,
-                width: 417.44,
-                child: Container(
-                  decoration: BoxDecoration(
-                    boxShadow: CustomBoxShadows.shadowOnDark
-                  ),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 134, 0, 255),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
-                      shadowColor: const Color.fromARGB(98, 0, 0, 0),
-                      elevation: 2,
-                      padding: EdgeInsets.zero,
+          SizedBox(
+            height: 1920,
+            width: 1080,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned(
+                  left: 176,
+                  top: 1583.86,
+                  height: 130.81,
+                  width: 417.44,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: CustomBoxShadows.shadowOnDark
                     ),
-                    onPressed: _gotoRools,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "ИГРАТЬ",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 57
-                          ),
-                        )
-                      ]
-                    )
-                  )
-                ),
-              ),
-              ExpandablePanel(
-                unload: backToClassChoose,
-                background: Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 57, 57, 57),
-                    borderRadius: BorderRadius.circular(35),
-                    boxShadow: CustomBoxShadows.shadowOnDark
-                  ),
-                ),
-                title: const Text(
-                  "ИЗМЕНИТЬ\nСОСТАВ",
-                  style: TextStyle(
-                    color: Color.fromARGB(255, 255, 255, 255),
-                    fontSize: 30,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                content: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          cardsSectionNum = 0;
-                        });
-                      },
-                      child: Container(
-                        decoration: const BoxDecoration(),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 134, 0, 255),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
+                        shadowColor: const Color.fromARGB(98, 0, 0, 0),
+                        elevation: 2,
+                        padding: EdgeInsets.zero,
                       ),
+                      onPressed: _gotoRools,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "ИГРАТЬ",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 57
+                            ),
+                          )
+                        ]
+                      )
+                    )
+                  ),
+                ),
+                ExpandablePanel(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 57, 57, 57),
+                      borderRadius: BorderRadius.circular(35),
+                      boxShadow: CustomBoxShadows.shadowOnDark
                     ),
-                    FittedBox(
-                      child: GestureDetector(
+                  ),
+                  title: const Text(
+                    "ИЗМЕНИТЬ\nСОСТАВ",
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 255, 255, 255),
+                      fontSize: 30,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  content: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      GestureDetector(
                         onTap: () {
                           setState(() {
                             cardsSectionNum = 0;
                           });
                         },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      cardsSectionNum = 1;
-                                    });
-                                  },
-                                  child: BorderedSocket(
-                                    height: 250,
-                                    width: 250,
-                                    radius: 6,
-                                    isBackBright: true,
-                                    child: SvgPicture.asset(
-                                      '../assets/images/icoSupport.svg',
-                                      fit: BoxFit.contain
+                        child: Container(
+                          decoration: const BoxDecoration(),
+                        ),
+                      ),
+                      FittedBox(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              cardsSectionNum = 0;
+                            });
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        cardsSectionNum = 1;
+                                      });
+                                    },
+                                    child: BorderedSocket(
+                                      height: 250,
+                                      width: 250,
+                                      radius: 6,
+                                      isBackBright: true,
+                                      child: SvgPicture.asset(
+                                        '../assets/images/icoSupport.svg',
+                                        fit: BoxFit.contain
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 44,),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      cardsSectionNum = 2;
-                                    });
-                                  },
-                                  child: BorderedSocket(
-                                    height: 250,
-                                    width: 250,
-                                    radius: 6,
-                                    isBackBright: true,
-                                    child: SvgPicture.asset(
-                                      '../assets/images/icoDamagger.svg',
-                                      fit: BoxFit.contain
+                                  const SizedBox(width: 44,),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        cardsSectionNum = 2;
+                                      });
+                                    },
+                                    child: BorderedSocket(
+                                      height: 250,
+                                      width: 250,
+                                      radius: 6,
+                                      isBackBright: true,
+                                      child: SvgPicture.asset(
+                                        '../assets/images/icoDamagger.svg',
+                                        fit: BoxFit.contain
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 44),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      cardsSectionNum = 3;
-                                    });
-                                  },
-                                  child: BorderedSocket(
-                                    height: 250,
-                                    width: 250,
-                                    radius: 6,
-                                    isBackBright: true,
-                                    child: SvgPicture.asset(
-                                      '../assets/images/icoHealer.svg',
-                                      fit: BoxFit.contain
+                                ],
+                              ),
+                              const SizedBox(height: 44),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        cardsSectionNum = 3;
+                                      });
+                                    },
+                                    child: BorderedSocket(
+                                      height: 250,
+                                      width: 250,
+                                      radius: 6,
+                                      isBackBright: true,
+                                      child: SvgPicture.asset(
+                                        '../assets/images/icoHealer.svg',
+                                        fit: BoxFit.contain
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 44,),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      cardsSectionNum = 4;
-                                    });
-                                  },
-                                  child: BorderedSocket(
-                                    height: 250,
-                                    width: 250,
-                                    radius: 6,
-                                    isBackBright: true,
-                                    child: SvgPicture.asset(
-                                      '../assets/images/icoShielder.svg',
-                                      fit: BoxFit.contain
+                                  const SizedBox(width: 44,),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        cardsSectionNum = 4;
+                                      });
+                                    },
+                                    child: BorderedSocket(
+                                      height: 250,
+                                      width: 250,
+                                      radius: 6,
+                                      isBackBright: true,
+                                      child: SvgPicture.asset(
+                                        '../assets/images/icoShielder.svg',
+                                        fit: BoxFit.contain
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ]
-                            ),
-                            const SizedBox(height: 44),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  cardsSectionNum = 5;
-                                });
-                              },
-                              child: const BorderedSocket(
-                                height: 180,
-                                width: 544,
-                                radius: 6,
-                                isBackBright: true,
-                                child: Text(
-                                  "ПОДМОГА",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 30
+                                ]
+                              ),
+                              const SizedBox(height: 44),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    cardsSectionNum = 5;
+                                  });
+                                },
+                                child: const BorderedSocket(
+                                  height: 180,
+                                  width: 544,
+                                  radius: 6,
+                                  isBackBright: true,
+                                  child: Text(
+                                    "ПОДМОГА",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 30
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ]
-                        ),
-                      ),
-                    ),
-                    cardsSectionNum == 1 ?
-                      ExpandablePanel (
-                        minY: 215,
-                        maxY: 215,
-                        minX: 104,
-                        maxX: 104,
-                        minH: 250,
-                        maxH: 792,
-                        minW: 250,
-                        maxW: 544,
-                        minTO: 90,
-                        maxTO: 50,
-                        selfActivating: true,
-                        unload: backToClassChoose,
-                        background: const BorderedSocket(
-                          radius: 6,
-                          isBackBright: true
-                        ),
-                        title: SvgPicture.asset(
-                          '../assets/images/icoSupport.svg',
-                          fit: BoxFit.contain
-                        ),
-                      )
-                    : cardsSectionNum == 2 ?
-                      ExpandablePanel (
-                        minY: 215,
-                        maxY: 215,
-                        minX: 104,
-                        maxX: 396,
-                        minH: 250,
-                        maxH: 792,
-                        minW: 250,
-                        maxW: 544,
-                        minTO: 90,
-                        maxTO: 50,
-                        selfActivating: true,
-                        unload: backToClassChoose,
-                        background: const BorderedSocket(
-                          radius: 6,
-                          isBackBright: true
-                        ),
-                        title: SvgPicture.asset(
-                          '../assets/images/icoDamagger.svg',
-                          fit: BoxFit.contain
-                        ),
-                      )
-                    : cardsSectionNum == 3 ?
-                      ExpandablePanel (
-                        minY: 215,
-                        maxY: 509,
-                        minX: 104,
-                        maxX: 104,
-                        minH: 250,
-                        maxH: 792,
-                        minW: 250,
-                        maxW: 544,
-                        minTO: 90,
-                        maxTO: 50,
-                        selfActivating: true,
-                        unload: backToClassChoose,
-                        background: const BorderedSocket(
-                          radius: 6,
-                          isBackBright: true
-                        ),
-                        title: SvgPicture.asset(
-                          '../assets/images/icoHealer.svg',
-                          fit: BoxFit.contain
-                        ),
-                      )
-                    : cardsSectionNum == 4 ?
-                      ExpandablePanel (
-                        minY: 215,
-                        maxY: 509,
-                        minX: 104,
-                        maxX: 396,
-                        minH: 250,
-                        maxH: 792,
-                        minW: 250,
-                        maxW: 544,
-                        minTO: 80,
-                        maxTO: 40,
-                        selfActivating: true,
-                        unload: backToClassChoose,
-                        background: const BorderedSocket(
-                          radius: 6,
-                          isBackBright: true
-                        ),
-                        title: SvgPicture.asset(
-                          '../assets/images/icoShielder.svg',
-                          fit: BoxFit.contain
-                        ),
-                      )
-                    : cardsSectionNum == 5 ?
-                      ExpandablePanel (
-                        minY: 215,
-                        maxY: 804,
-                        minX: 104,
-                        maxX: 104,
-                        minH: 180,
-                        maxH: 792,
-                        minW: 544,
-                        maxW: 544,
-                        minTO: 75,
-                        maxTO: 50,
-                        selfActivating: true,
-                        unload: backToClassChoose,
-                        background: const BorderedSocket(
-                          radius: 6,
-                          isBackBright: true
-                        ),
-                        title: const Text(
-                          "ПОДМОГА",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 30
+                            ]
                           ),
                         ),
-                      )
-                    : const SizedBox(),
-                  ]
+                      ),
+                      cardsSectionNum == 1 ?
+                        ExpandablePanel (
+                          minY: 215,
+                          maxY: 215,
+                          minX: 104,
+                          maxX: 104,
+                          minH: 250,
+                          maxH: 792,
+                          minW: 250,
+                          maxW: 544,
+                          minTO: 90,
+                          maxTO: 50,
+                          selfActivating: true,
+                          background: const BorderedSocket(
+                            radius: 6,
+                            isBackBright: true
+                          ),
+                          title: SvgPicture.asset(
+                            '../assets/images/icoSupport.svg',
+                            fit: BoxFit.contain
+                          ),
+                        )
+                      : cardsSectionNum == 2 ?
+                        ExpandablePanel (
+                          minY: 215,
+                          maxY: 215,
+                          minX: 104,
+                          maxX: 396,
+                          minH: 250,
+                          maxH: 792,
+                          minW: 250,
+                          maxW: 544,
+                          minTO: 90,
+                          maxTO: 50,
+                          selfActivating: true,
+                          background: const BorderedSocket(
+                            radius: 6,
+                            isBackBright: true
+                          ),
+                          title: SvgPicture.asset(
+                            '../assets/images/icoDamagger.svg',
+                            fit: BoxFit.contain
+                          ),
+                        )
+                      : cardsSectionNum == 3 ?
+                        ExpandablePanel (
+                          minY: 215,
+                          maxY: 509,
+                          minX: 104,
+                          maxX: 104,
+                          minH: 250,
+                          maxH: 792,
+                          minW: 250,
+                          maxW: 544,
+                          minTO: 90,
+                          maxTO: 50,
+                          selfActivating: true,
+                          background: const BorderedSocket(
+                            radius: 6,
+                            isBackBright: true
+                          ),
+                          title: SvgPicture.asset(
+                            '../assets/images/icoHealer.svg',
+                            fit: BoxFit.contain
+                          ),
+                        )
+                      : cardsSectionNum == 4 ?
+                        ExpandablePanel (
+                          minY: 215,
+                          maxY: 537,
+                          minX: 104,
+                          maxX: 396,
+                          minH: 250,
+                          maxH: 792,
+                          minW: 250,
+                          maxW: 544,
+                          minTO: 80,
+                          maxTO: 40,
+                          selfActivating: true,
+                          background: const BorderedSocket(
+                            radius: 6,
+                            isBackBright: true
+                          ),
+                          title: SvgPicture.asset(
+                            '../assets/images/icoShielder.svg',
+                            fit: BoxFit.contain
+                          ),
+                        )
+                      : cardsSectionNum == 5 ?
+                        const ExpandablePanel (
+                          minY: 215,
+                          maxY: 804,
+                          minX: 104,
+                          maxX: 104,
+                          minH: 180,
+                          maxH: 792,
+                          minW: 544,
+                          maxW: 544,
+                          minTO: 75,
+                          maxTO: 50,
+                          selfActivating: true,
+                          background: BorderedSocket(
+                            radius: 6,
+                            isBackBright: true
+                          ),
+                          title: Text(
+                            "ПОДМОГА",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 30
+                            ),
+                          ),
+                        )
+                      : SizedBox(),
+                    ]
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
