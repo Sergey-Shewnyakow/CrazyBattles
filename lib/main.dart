@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'card_information_view.dart'; //for viewing info about card on click the info button
 import 'card_socket.dart'; //bordered socket for card in menu
@@ -8,6 +9,10 @@ import 'cards_complect.dart'; //selected cards stack implementation in menu
 import 'carousel.dart';//carousel for card choose implementation
 import 'extendable_panel.dart';//panels that become huge on click
 import 'custom_colors.dart';//custom colors
+import 'package:figma_squircle/figma_squircle.dart'; // package for rounded corners
+import 'package:loading_animation_widget/loading_animation_widget.dart'; // beautiful loading animations
+import 'package:timer_stop_watch/timer_stop_watch.dart'; // timer
+import 'package:flutter_animate/flutter_animate.dart'; // animations
 
 // Виджет игры
 class CardGameApp extends StatefulWidget {
@@ -17,14 +22,37 @@ class CardGameApp extends StatefulWidget {
 
 class _CardGameAppState extends State<CardGameApp> {
   GameModel? game;
-  bool inLobby = true;
+  int inLobby = 0; // 0 = menu 1 = opponent search 2 = game screen
   int cardsSectionNum = 0;
   CardModel? newCard;
   CardModel? cardInfoFor;
+  DateTime _timeStart = DateTime.now();
+  String _timeStopwatch= "";
+  late Timer _timer;
 
   //void _gotoRools() {
     // TODO: запуск меню правил
   //}
+@override
+  void _goToOpponentSearch() {
+    _timeStart = DateTime.now();
+    setState(() {
+      inLobby = 1;
+    });
+
+  }
+
+@override
+void initState() {
+  _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+  int _timeNow = DateTime.now().difference(_timeStart).inSeconds.toInt();
+  setState(() {
+      _timeStopwatch = "${_timeNow ~/ 60}:${_timeNow < 10 ? "0" : ""}${_timeNow % 60}";
+    });
+  });
+  super.initState();
+}
+  
 
   // Запуск игры с выбранными картами
   // TODO: выдача игрокам выбранных ими карт
@@ -96,7 +124,7 @@ class _CardGameAppState extends State<CardGameApp> {
             child: SizedBox(
               width: 1080,
               height: 1920,
-              child: inLobby ? _buildLobby() : _buildGame(),
+              child: inLobby ==0 ? _buildLobby() :inLobby==1? _opponentSearch() : _gameScreen(),
             ),
           ),
         ),
@@ -289,8 +317,8 @@ class _CardGameAppState extends State<CardGameApp> {
                         elevation: 2,
                         padding: EdgeInsets.zero,
                       ),
-                      //TODO: сделать коммент кодом вместо null, когда будет готова функция начала игры
-                      onPressed: null,//selectedCharacterCards.length == 3 ? _startGame : null,
+                      
+                      onPressed: selectedCharacterCards.length == 3 ? _goToOpponentSearch : null,
                       child: Text(
                         "ИГРАТЬ",
                         style: TextStyle(
@@ -606,6 +634,134 @@ class _CardGameAppState extends State<CardGameApp> {
     );
   }
 
+  Widget _opponentSearch() {
+    return Stack(
+      alignment: AlignmentDirectional.topCenter ,
+      children: [ 
+      Positioned(
+        top: 560,
+        child:Container(
+              width: 400,
+              height: 160,
+              padding: const EdgeInsets.all(10),
+              decoration: ShapeDecoration(
+                shadows: CustomBoxShadows.shadowOnDark,
+                  color: CustomColors.greyLight,
+                  shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                          cornerRadius: 30,
+                          cornerSmoothing: 1)
+                ),
+              ),
+              child: Container(
+              padding: const EdgeInsets.all(10),
+              //width: 768,
+              //height: 374,
+              decoration: ShapeDecoration(
+                  color: CustomColors.greyDark,
+                      shape: SmoothRectangleBorder(
+                              borderRadius: SmoothBorderRadius(
+                              cornerRadius: 20,
+                              cornerSmoothing: 1)
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 30, left:20, right: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      
+                      children: [
+                        SvgPicture.asset(
+                        '../assets/images/icoClock.svg',
+                        fit: BoxFit.contain),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        Padding(padding: const EdgeInsets.only(top:7),
+                        child: Animate(
+                          effects: const [FadeEffect(delay: Duration(milliseconds: 1000))],
+                          child: Text(
+                          _timeStopwatch,
+                          style: TextStyle(
+                            color: CustomColors.greyLight,
+                            fontSize: 60
+                          )
+                          )
+                        )
+                        )
+                      ],
+                    )
+              ),
+            ),
+          )
+        ),
+      Positioned(
+        top: 200,
+        child:Container(
+              width: 778,
+              height: 384,
+              padding: const EdgeInsets.all(10),
+              decoration: ShapeDecoration(
+                shadows: CustomBoxShadows.shadowOnDark,
+                  color: CustomColors.greyLight,
+                  shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                          cornerRadius: 54,
+                          cornerSmoothing: 1)
+                ),
+              ),
+              child: Container(
+              padding: const EdgeInsets.all(10),
+              //width: 768,
+              //height: 374,
+              decoration: ShapeDecoration(
+                  color: CustomColors.greyDark,
+                      shape: SmoothRectangleBorder(
+                              borderRadius: SmoothBorderRadius(
+                              cornerRadius: 44,
+                              cornerSmoothing: 1)
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(75),
+                    child: SizedBox(
+                      child: SvgPicture.asset(
+                      '../assets/images/logo.svg',
+                      fit: BoxFit.contain)
+              ),
+            ),
+          )
+        ),
+      ),
+      Positioned(
+        top: 940,
+        child: LoadingAnimationWidget.stretchedDots(
+          color: CustomColors.mainBright, 
+          size: 200,
+
+        )
+      ),
+      Positioned(
+        top: 1350,
+        child: Animate(
+          onPlay: (controller) => controller.repeat(),
+          effects: [ShimmerEffect(color: CustomColors.mainBright,
+                                  delay: const Duration(milliseconds: 1000),
+                                  duration: const Duration(milliseconds: 2000))],
+          child: const Padding(padding:  EdgeInsets.all(4),
+            child:  Text("ПОИСК\nСОПЕРНИКА",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+            height: 0.85,
+            color: Color.fromARGB(255, 255, 255, 255),
+            fontSize: 100)
+          )
+          )
+        )
+      )
+      ],
+    );
+  }
   // Виджет карты
   //TODO: change to sth that views card's visual
   //Widget _buildCardWidget(CardModel card, bool isSelected, Function(CardModel)? onTap) {
@@ -638,7 +794,7 @@ class _CardGameAppState extends State<CardGameApp> {
   //}
 
   //TODO: Добавить сам игровой процесс
-  Widget _buildGame() {
+  Widget _gameScreen() {
     return const Stack(
       children: [
   //      // Карты второго игрока
