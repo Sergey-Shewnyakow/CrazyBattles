@@ -28,8 +28,22 @@ class _infoCardState extends State<InfoCard> {//TODO: animate
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Image.asset(
-              "../assets/rules/page_${widget.card!.infoPage}.png",
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  "../assets/rules/page_${widget.card!.infoPage}.png",
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    height: 90,
+                    width: 125,
+                    color: CustomColors.greyInfo,
+                  ),
+                ),
+              ]
             ),
             Positioned(
               top: 200,

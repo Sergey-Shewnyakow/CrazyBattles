@@ -3,17 +3,15 @@ import 'package:dotted_border/dotted_border.dart';
 import 'custom_shadows.dart'; //custom box shadows
 import 'custom_colors.dart';//custom colors
 
-class BorderedSocket extends StatelessWidget {
+class BorderedSquare extends StatelessWidget {
   final Widget? child;
   final double radius;
   final double height;
   final double width;
-  final bool isBackBright;
 
-  const BorderedSocket({
+  const BorderedSquare({
     super.key,
-    this.radius = 0,
-    this.isBackBright = false,
+    required this.radius,
     this.height = 0,
     this.width = 0,
     this.child,
@@ -31,9 +29,7 @@ class BorderedSocket extends StatelessWidget {
           decoration: BoxDecoration(
             color: CustomColors.greyDark,
             borderRadius: BorderRadius.circular(radius+5),
-            boxShadow: isBackBright
-            ? CustomBoxShadows.shadowOnBright
-            : CustomBoxShadows.shadowOnDark
+            boxShadow: CustomBoxShadows.shadowOnBright,
           ),
           child: child,
         )
@@ -47,9 +43,7 @@ class BorderedSocket extends StatelessWidget {
               width: 9,
               strokeAlign: BorderSide.strokeAlignCenter,
             ),
-            boxShadow: isBackBright
-            ? CustomBoxShadows.shadowOnBright
-            : CustomBoxShadows.shadowOnDark
+            boxShadow: CustomBoxShadows.shadowOnBright,
           ),
           child: child,
         ),

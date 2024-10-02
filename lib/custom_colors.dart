@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 class CustomColors {
   static get greyDark => const Color.fromARGB(255, 16, 16, 16);//backround
+  static get greyInfo => const Color.fromARGB(255, 15, 15, 15);//grey in info menu
+  static get cardSlot => const Color.fromARGB(255, 28, 28, 28);//color for card slot
   static get greyLight => const Color.fromARGB(255, 57, 57, 57);//for grey buttons and panels (for example: panel of card class choose)
   static get greyText => const Color.fromARGB(255, 104, 104, 104);
   static get inactiveText => const Color.fromARGB(255, 139, 139, 139);//text on inactive start button

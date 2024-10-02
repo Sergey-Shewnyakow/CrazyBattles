@@ -104,7 +104,7 @@ List<CardModel> characterCards = [
 ];
 
 // Карты подмоги
-List<CardModel> AssistCards = [
+List<CardModel> assistCards = [
   CardModel(name: "Мансарда", asset: '../assets/cards/adders/Mansarda.png', infoPage: 45, cardClass: "Постоянная", isAssist: true),
   CardModel(name: "МиМ", asset: '../assets/cards/adders/MiM.png', infoPage: 44, cardClass: "Периодическая", isAssist: true),
   CardModel(name: "СВП", asset: '../assets/cards/adders/SVP.png', infoPage: 47, cardClass: "Периодическая", isAssist: true),

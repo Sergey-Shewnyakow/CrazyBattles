@@ -1,18 +1,18 @@
-import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/material.dart'; // flutter visual lib
+import 'dart:async'; // async lib
+import 'package:flutter_svg/flutter_svg.dart'; // svg lib
+import 'package:flutter_animate/flutter_animate.dart'; // animations lib
+import 'package:loading_animation_widget/loading_animation_widget.dart'; // beautiful loading animations lib
+import 'package:figma_squircle/figma_squircle.dart'; // package for rounded corners
+
 import 'card_information_view.dart'; //for viewing info about card on click the info button
-import 'card_socket.dart'; //bordered socket for card in menu
+import 'bordered_square.dart'; //bordered square for class choose
 import 'custom_shadows.dart'; //custom box shadows
 import 'game_models.dart'; // models of cards, game and players, cards data
-import 'cards_complect.dart'; //selected cards stack implementation in menu
 import 'carousel.dart';//carousel for card choose implementation
-import 'extendable_panel.dart';//panels that become huge on click
+import 'expandable_panel.dart';//panels that become huge on click
 import 'custom_colors.dart';//custom colors
-import 'package:figma_squircle/figma_squircle.dart'; // package for rounded corners
-import 'package:loading_animation_widget/loading_animation_widget.dart'; // beautiful loading animations
-import 'package:timer_stop_watch/timer_stop_watch.dart'; // timer
-import 'package:flutter_animate/flutter_animate.dart'; // animations
+import 'card_slot.dart';//slot for card in menu
 
 // Виджет игры
 class CardGameApp extends StatefulWidget {
@@ -24,35 +24,42 @@ class _CardGameAppState extends State<CardGameApp> {
   GameModel? game;
   int inLobby = 0; // 0 = menu 1 = opponent search 2 = game screen
   int cardsSectionNum = 0;
-  CardModel? newCard;
   CardModel? cardInfoFor;
   DateTime _timeStart = DateTime.now();
   String _timeStopwatch= "";
-  late Timer _timer;
+  bool _isTimerStarted = false;
+  List<Slot> slots = [];
 
   //void _gotoRools() {
-    // TODO: запуск меню правил
+  // TODO: запуск меню правил
   //}
-@override
+
   void _goToOpponentSearch() {
     _timeStart = DateTime.now();
-    setState(() {
-      inLobby = 1;
-    });
-
+    _isTimerStarted = false;
+    setState(() {inLobby = 1;});
   }
 
-@override
-void initState() {
-  _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-  int _timeNow = DateTime.now().difference(_timeStart).inSeconds.toInt();
-  setState(() {
-      _timeStopwatch = "${_timeNow ~/ 60}:${_timeNow < 10 ? "0" : ""}${_timeNow % 60}";
-    });
-  });
-  super.initState();
-}
-  
+  @override
+  void initState() {
+    slots = [
+      Slot(isAssist: true, slotNumber: 0, reload: _selectAssistCard),
+      Slot(isAssist: false, slotNumber: 0, reload: _selectCharacterCard),
+      Slot(isAssist: false, slotNumber: 1, reload: _selectCharacterCard),
+      Slot(isAssist: false, slotNumber: 2, reload: _selectCharacterCard),
+      Slot(isAssist: true, slotNumber: 1, reload: _selectAssistCard),
+    ];
+    Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) {
+        int timeNow = DateTime.now().difference(_timeStart).inSeconds.toInt();
+        setState(() {
+          _timeStopwatch = "${timeNow ~/ 60}:${timeNow % 60 < 10 ? "0" : ""}${timeNow % 60}";
+        });
+      }
+    );
+    super.initState();
+  }
 
   // Запуск игры с выбранными картами
   // TODO: выдача игрокам выбранных ими карт
@@ -77,23 +84,40 @@ void initState() {
 
   // Выбор карт персонажей
   void _selectCharacterCard(CardModel card) {
-    if (selectedCharacterCards.contains(card)) {
+    if (selectedCharacterCards.contains(card)) {// removing card
       selectedCharacterCards.remove(card);
+      _reloadCharacterCards();
       setState(() {});
-    } else if (selectedCharacterCards.length < 3) {
+    } else if (selectedCharacterCards.length < 3) {// adding card
       selectedCharacterCards.add(card);
-      setState(() {newCard = card;});
+      _reloadCharacterCards();
+      setState(() {});
+    }
+  }
+
+  void _reloadCharacterCards() {
+    for (int i = 0; i < 3; i++) {
+      slots[i+1] = Slot(isAssist: false, slotNumber: i, reload: _selectCharacterCard);//slots[1,2,3]
     }
   }
 
   // Выбор карт подмоги
-  void _selectAssistCard(CardModel card) {
+  void _selectAssistCard(CardModel card) {// removing card
+
     if (selectedAssistCards.contains(card)) {
       selectedAssistCards.remove(card);
+      _reloadAssistCards();
       setState(() {});
-    } else if (selectedAssistCards.length < 2) {
+    } else if (selectedAssistCards.length < 2) {// adding card
       selectedAssistCards.add(card);
-      setState(() {newCard = card;});
+      _reloadAssistCards();
+      setState(() {});
+    }
+  }
+
+  void _reloadAssistCards() {
+    for (int i = 0; i < 2; i++) {
+      slots[i*4] = Slot(isAssist: true, slotNumber: i, reload: _selectAssistCard);//slots[0 & 4]
     }
   }
 
@@ -124,7 +148,7 @@ void initState() {
             child: SizedBox(
               width: 1080,
               height: 1920,
-              child: inLobby ==0 ? _buildLobby() :inLobby==1? _opponentSearch() : _gameScreen(),
+              child: inLobby==0 ? _buildLobby() : inLobby==1 ? _opponentSearch() : _gameScreen(),
             ),
           ),
         ),
@@ -173,70 +197,66 @@ void initState() {
                 ),
               ),
               const SizedBox(height: 119),
-              Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 25,
-                    ),
-                    decoration: BoxDecoration(
-                      color: CustomColors.greyDark,
-                      borderRadius: BorderRadius.circular(51),
-                      border: Border.all(
-                        color: CustomColors.greyLight,
-                        width: 10,
-                      ),
-                      boxShadow: CustomBoxShadows.shadowOnDark
-                    ),
-                    width: 743,
-                    child: Row(
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 25,
+                ),
+                decoration: BoxDecoration(
+                  color: CustomColors.greyDark,
+                  borderRadius: BorderRadius.circular(51),
+                  border: Border.all(
+                    color: CustomColors.greyLight,
+                    width: 10,
+                  ),
+                  boxShadow: CustomBoxShadows.shadowOnDark
+                ),
+                width: 743,
+                child: Row( // TODO: account
+                  children: [
+                    Stack(
+                      alignment: AlignmentDirectional.center,
                       children: [
-                        Stack(
-                          alignment: AlignmentDirectional.center,
-                          children: [
-                            Image.asset(
-                              '../assets/images/missing_avatar.jpg',
-                              width: 167.2,
-                              height: 167.2,
-                            ),
-                            Container(
-                              width: 199,
-                              height: 199,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(35),
-                                border: Border.all(
-                                  color: CustomColors.mainBright,
-                                  width: 16,
-                                ),
-                              ),
-                            ),
-                          ],
+                        Image.asset(
+                          '../assets/images/missing_avatar.jpg',
+                          width: 167.2,
+                          height: 167.2,
                         ),
-                        const SizedBox(width: 40),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "ВЛАД ЛАХТА",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 46.9,
-                              ),
+                        Container(
+                          width: 199,
+                          height: 199,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(35),
+                            border: Border.all(
+                              color: CustomColors.mainBright,
+                              width: 16,
                             ),
-                            Text(
-                              "@lahta_vlad",
-                              style: TextStyle(
-                                color: CustomColors.greyText,
-                                fontSize: 31.15,
-                              )
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 40),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "ВЛАД ЛАХТА",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 46.9,
+                          ),
+                        ),
+                        Text(
+                          "@lahta_vlad",
+                          style: TextStyle(
+                            color: CustomColors.greyText,
+                            fontSize: 31.15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 51),
               Stack(//rating
@@ -272,22 +292,6 @@ void initState() {
                   ),
                 ]
               ),
-              const SizedBox(height: 18),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  BorderedSocket(radius: 4.59, height: 144.94, width: 93.27),
-                  SizedBox(width: 26),
-                  BorderedSocket(radius: 6.82, height: 215.64, width: 138.77),
-                  SizedBox(width: 26),
-                  BorderedSocket(radius: 6.82, height: 215.64, width: 138.77),
-                  SizedBox(width: 26),
-                  BorderedSocket(radius: 6.82, height: 215.64, width: 138.77),
-                  SizedBox(width: 26),
-                  BorderedSocket(radius: 4.59, height: 144.94, width: 93.27),
-                ],
-              ),
             ],
           ),
         ),
@@ -297,37 +301,58 @@ void initState() {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              CardsComplect(card: newCard),
               ExpandablePanel(
-                addictionalBut: Positioned(
-                  left: 176,
-                  top: 1583.86,
-                  height: 130.81,
-                  width: 417.44,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: CustomBoxShadows.shadowOnDark
-                    ),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: CustomColors.mainBright,
-                        disabledBackgroundColor: CustomColors.greyLight,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
-                        shadowColor: CustomColors.darkShadowMain,
-                        elevation: 2,
-                        padding: EdgeInsets.zero,
+                addictionalBut: Stack(
+                  children: [
+                    Positioned(
+                      top: 1300,
+                      left: 180,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          slots[0],
+                          const SizedBox(width: 26),
+                          slots[1],
+                          const SizedBox(width: 26),
+                          slots[2],
+                          const SizedBox(width: 26),
+                          slots[3],
+                          const SizedBox(width: 26),
+                          slots[4],
+                        ],
                       ),
-                      
-                      onPressed: selectedCharacterCards.length == 3 ? _goToOpponentSearch : null,
-                      child: Text(
-                        "ИГРАТЬ",
-                        style: TextStyle(
-                          color: selectedCharacterCards.length == 3 ? Colors.white : CustomColors.inactiveText,
-                          fontSize: 57
-                        )
-                      )
-                    )
-                  ),
+                    ),
+                    Positioned(
+                      left: 176,
+                      top: 1583.86,
+                      height: 130.81,
+                      width: 417.44,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: CustomBoxShadows.shadowOnDark
+                        ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: CustomColors.mainBright,
+                            disabledBackgroundColor: CustomColors.greyLight,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
+                            shadowColor: CustomColors.darkShadowMain,
+                            elevation: 2,
+                            padding: EdgeInsets.zero,
+                          ),
+                          onPressed: selectedCharacterCards.length == 3 ? _goToOpponentSearch : null,
+                          child: Text(
+                            "ИГРАТЬ",
+                            style: TextStyle(
+                              color: selectedCharacterCards.length == 3 ? Colors.white : CustomColors.inactiveText,
+                              fontSize: 57
+                            )
+                          )
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 unload: backToClassChoose,
                 background: Container(
@@ -377,11 +402,10 @@ void initState() {
                                       cardsSectionNum = 1;
                                     });
                                   },
-                                  child: BorderedSocket(
+                                  child: BorderedSquare(
                                     height: 250,
                                     width: 250,
                                     radius: 6,
-                                    isBackBright: true,
                                     child: SvgPicture.asset(
                                       '../assets/images/icoSupport.svg',
                                       fit: BoxFit.contain
@@ -395,11 +419,10 @@ void initState() {
                                       cardsSectionNum = 2;
                                     });
                                   },
-                                  child: BorderedSocket(
+                                  child: BorderedSquare(
                                     height: 250,
                                     width: 250,
                                     radius: 6,
-                                    isBackBright: true,
                                     child: SvgPicture.asset(
                                       '../assets/images/icoDamagger.svg',
                                       fit: BoxFit.contain
@@ -418,11 +441,10 @@ void initState() {
                                       cardsSectionNum = 3;
                                     });
                                   },
-                                  child: BorderedSocket(
+                                  child: BorderedSquare(
                                     height: 250,
                                     width: 250,
                                     radius: 6,
-                                    isBackBright: true,
                                     child: SvgPicture.asset(
                                       '../assets/images/icoHealer.svg',
                                       fit: BoxFit.contain
@@ -436,11 +458,10 @@ void initState() {
                                       cardsSectionNum = 4;
                                     });
                                   },
-                                  child: BorderedSocket(
+                                  child: BorderedSquare(
                                     height: 250,
                                     width: 250,
                                     radius: 6,
-                                    isBackBright: true,
                                     child: SvgPicture.asset(
                                       '../assets/images/icoShielder.svg',
                                       fit: BoxFit.contain
@@ -456,11 +477,10 @@ void initState() {
                                   cardsSectionNum = 5;
                                 });
                               },
-                              child: const BorderedSocket(
+                              child: const BorderedSquare(
                                 height: 180,
                                 width: 544,
                                 radius: 6,
-                                isBackBright: true,
                                 child: Text(
                                   "ПОДМОГА",
                                   style: TextStyle(
@@ -488,10 +508,7 @@ void initState() {
                         maxTO: 50,
                         selfActivating: true,
                         unload: backToClassChoose,
-                        background: const BorderedSocket(
-                          radius: 6,
-                          isBackBright: true
-                        ),
+                        background: const BorderedSquare(radius: 6),
                         title: SvgPicture.asset(
                           '../assets/images/icoSupport.svg',
                           fit: BoxFit.contain
@@ -517,10 +534,7 @@ void initState() {
                         maxTO: 50,
                         selfActivating: true,
                         unload: backToClassChoose,
-                        background: const BorderedSocket(
-                          radius: 6,
-                          isBackBright: true
-                        ),
+                        background: const BorderedSquare(radius: 6),
                         title: SvgPicture.asset(
                           '../assets/images/icoDamagger.svg',
                           fit: BoxFit.contain
@@ -546,10 +560,7 @@ void initState() {
                         maxTO: 50,
                         selfActivating: true,
                         unload: backToClassChoose,
-                        background: const BorderedSocket(
-                          radius: 6,
-                          isBackBright: true
-                        ),
+                        background: const BorderedSquare(radius: 6),
                         title: SvgPicture.asset(
                           '../assets/images/icoHealer.svg',
                           fit: BoxFit.contain
@@ -575,10 +586,7 @@ void initState() {
                         maxTO: 40,
                         selfActivating: true,
                         unload: backToClassChoose,
-                        background: const BorderedSocket(
-                          radius: 6,
-                          isBackBright: true
-                        ),
+                        background: const BorderedSquare(radius: 6),
                         title: SvgPicture.asset(
                           '../assets/images/icoShielder.svg',
                           fit: BoxFit.contain
@@ -604,10 +612,7 @@ void initState() {
                         maxTO: 50,
                         selfActivating: true,
                         unload: backToClassChoose,
-                        background: const BorderedSocket(
-                          radius: 6,
-                          isBackBright: true
-                        ),
+                        background: const BorderedSquare(radius: 6),
                         title: const Text(
                           "ПОДМОГА",
                           style: TextStyle(
@@ -616,7 +621,7 @@ void initState() {
                           ),
                         ),
                         content: ImageCarousel(
-                          imageAssets: AssistCards.map((card) => card.asset).toList(),
+                          imageAssets: assistCards.map((card) => card.asset).toList(),
                           sectionNumber: cardsSectionNum-1,
                           pick: _selectAssistCard,
                           info: _loadInfo,
@@ -636,132 +641,143 @@ void initState() {
 
   Widget _opponentSearch() {
     return Stack(
-      alignment: AlignmentDirectional.topCenter ,
-      children: [ 
-      Positioned(
-        top: 560,
-        child:Container(
+      alignment: AlignmentDirectional.topCenter,
+      children: [
+        Animate(
+          onPlay: (controller) => _isTimerStarted = true,
+          effects: const [MoveEffect(
+            duration: Duration(milliseconds: 500),
+            curve: Curves.easeOutCubic,
+            begin: Offset(0, -150),
+            end: Offset(0, 0),
+          )],
+          child: Positioned(
+            top: 560,
+            child:Container(
               width: 400,
               height: 160,
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(8),
               decoration: ShapeDecoration(
                 shadows: CustomBoxShadows.shadowOnDark,
-                  color: CustomColors.greyLight,
-                  shape: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                          cornerRadius: 30,
-                          cornerSmoothing: 1)
+                color: CustomColors.greyLight,
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 30,
+                    cornerSmoothing: 1,
+                  ),
                 ),
               ),
               child: Container(
-              padding: const EdgeInsets.all(10),
-              //width: 768,
-              //height: 374,
-              decoration: ShapeDecoration(
+                padding: const EdgeInsets.all(10),
+                decoration: ShapeDecoration(
                   color: CustomColors.greyDark,
-                      shape: SmoothRectangleBorder(
-                              borderRadius: SmoothBorderRadius(
-                              cornerRadius: 20,
-                              cornerSmoothing: 1)
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 20,
+                      cornerSmoothing: 1,
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 30, left:20, right: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      
-                      children: [
-                        SvgPicture.asset(
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 30, left:20, right: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
                         '../assets/images/icoClock.svg',
-                        fit: BoxFit.contain),
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        Padding(padding: const EdgeInsets.only(top:7),
-                        child: Animate(
-                          effects: const [FadeEffect(delay: Duration(milliseconds: 1000))],
-                          child: Text(
-                          _timeStopwatch,
+                        fit: BoxFit.contain,
+                      ),
+
+                      const SizedBox(width: 20),
+
+                      Padding(
+                        padding: const EdgeInsets.only(top:7),
+                        child: Text(
+                          _isTimerStarted ? _timeStopwatch : "0:00",
                           style: TextStyle(
                             color: CustomColors.greyLight,
                             fontSize: 60
-                          )
-                          )
-                        )
-                        )
-                      ],
-                    )
-              ),
-            ),
-          )
-        ),
-      Positioned(
-        top: 200,
-        child:Container(
-              width: 778,
-              height: 384,
-              padding: const EdgeInsets.all(10),
-              decoration: ShapeDecoration(
-                shadows: CustomBoxShadows.shadowOnDark,
-                  color: CustomColors.greyLight,
-                  shape: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                          cornerRadius: 54,
-                          cornerSmoothing: 1)
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Container(
-              padding: const EdgeInsets.all(10),
-              //width: 768,
-              //height: 374,
-              decoration: ShapeDecoration(
-                  color: CustomColors.greyDark,
-                      shape: SmoothRectangleBorder(
-                              borderRadius: SmoothBorderRadius(
-                              cornerRadius: 44,
-                              cornerSmoothing: 1)
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(75),
-                    child: SizedBox(
-                      child: SvgPicture.asset(
-                      '../assets/images/logo.svg',
-                      fit: BoxFit.contain)
+            ),
+          ),
+        ),
+        Positioned(
+          top: 200,
+          child:Container(
+            width: 778,
+            height: 384,
+            padding: const EdgeInsets.all(10),
+            decoration: ShapeDecoration(
+              shadows: CustomBoxShadows.shadowOnDark,
+              color: CustomColors.greyLight,
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 54,
+                  cornerSmoothing: 1,
+                ),
               ),
             ),
-          )
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: ShapeDecoration(
+                color: CustomColors.greyDark,
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 44,
+                    cornerSmoothing: 1,
+                  ),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(75),
+                child: SizedBox(
+                  child: SvgPicture.asset(
+                    '../assets/images/logo.svg',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
-      ),
-      Positioned(
-        top: 940,
-        child: LoadingAnimationWidget.stretchedDots(
-          color: CustomColors.mainBright, 
-          size: 200,
-
-        )
-      ),
-      Positioned(
-        top: 1350,
-        child: Animate(
-          onPlay: (controller) => controller.repeat(),
-          effects: [ShimmerEffect(color: CustomColors.mainBright,
-                                  delay: const Duration(milliseconds: 1000),
-                                  duration: const Duration(milliseconds: 2000))],
-          child: const Padding(padding:  EdgeInsets.all(4),
-            child:  Text("ПОИСК\nСОПЕРНИКА",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-            height: 0.85,
-            color: Color.fromARGB(255, 255, 255, 255),
-            fontSize: 100)
-          )
-          )
-        )
-      )
+        Positioned(
+          top: 940,
+          child: LoadingAnimationWidget.stretchedDots(
+            color: CustomColors.mainBright, 
+            size: 200,
+          ),
+        ),
+        Positioned(
+          top: 1350,
+          child: Animate(
+            onPlay: (controller) => controller.repeat(),
+            effects: [ShimmerEffect(color: CustomColors.mainBright,
+                                    delay: const Duration(milliseconds: 1000),
+                                    duration: const Duration(milliseconds: 2000))],
+            child: const Padding(
+              padding:  EdgeInsets.only(top: 10),
+              child:  Text(
+                "ПОИСК\nСОПЕРНИКА",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  height: 0.85,
+                  color: Colors.white,
+                  fontSize: 100,
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
+
   // Виджет карты
   //TODO: change to sth that views card's visual
   //Widget _buildCardWidget(CardModel card, bool isSelected, Function(CardModel)? onTap) {

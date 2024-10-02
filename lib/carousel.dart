@@ -29,7 +29,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
       return characterCards[widget.sectionNumber*7 + _currentImageIndex];
     }
     else {
-      return AssistCards[_currentImageIndex];
+      return assistCards[_currentImageIndex];
     }
   }
 
@@ -43,27 +43,31 @@ class _ImageCarouselState extends State<ImageCarousel> {
           child: CarouselSlider(
             carouselController: _carouselController, // Передаем контроллер
             items: widget.imageAssets.map((imageAsset) {
-              return Container(
-                width: 550*0.643, // Ширина экрана
-                margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(
-                      imageAsset,
+              return MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Container(
+                  width: 550*0.643, // Ширина экрана
+                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(
+                        imageAsset,
+                      ),
                     ),
                   ),
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    widget.pick(_currentCard());
-                  },
-                  child: Container(
-                    decoration: const BoxDecoration(),
-                  )
+                  child: GestureDetector(
+                    onTap: () {
+                      widget.pick(_currentCard());
+                    },
+                    child: Container(
+                      decoration: const BoxDecoration(),
+                    )
+                  ),
                 ),
               );
             }).toList(),
             options: CarouselOptions(
+              scrollPhysics: ScrollPhysics(parent: NeverScrollableScrollPhysics()), // Не листается by drag of the carousel
               height: 550.0, // Высота карусели
               viewportFraction: 1.0, // Занимает всю ширину экрана
               enlargeCenterPage: false, // Без увеличения центрального изображения
