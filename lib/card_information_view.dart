@@ -13,52 +13,96 @@ class InfoCard extends StatefulWidget {
   });
 
   @override
-  _infoCardState createState() => _infoCardState();
+  InfoCardState createState() => InfoCardState();
 }
 
-class _infoCardState extends State<InfoCard> {//TODO: animate
+class InfoCardState extends State<InfoCard> with SingleTickerProviderStateMixin {//TODO: check if it's possible to make common base class with expandable panels
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  bool _isExpanded = false;
+  bool _isClosing = false;// true when starts to close
+  
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 0, end: 1.0).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.card != null) {
-      return Container(
-        height: 1920,
-        width: 1080,
-        decoration: BoxDecoration(color: CustomColors.greyDark),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Stack(
+    if (widget.card != null && !_isExpanded) {
+      _controller.forward();
+      setState(() {
+        _isExpanded = true;
+      });
+    }
+    else if (_isExpanded && _isClosing) {
+      _controller.reverse().then((_) {
+        setState(() {
+          _isExpanded = false;
+          _isClosing = false;
+        });
+        widget.close(null);
+      });
+    }
+    else if (widget.card == null) {
+      return const SizedBox.shrink();
+    }
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Center (
+          child: Container(
+            height: _animation.value*1920,
+            width: _animation.value*1080,
+            decoration: BoxDecoration(color: CustomColors.greyDark),
+            child: Stack(
               alignment: Alignment.center,
               children: [
-                Image.asset(
-                  "../assets/rules/page_${widget.card!.infoPage}.png",
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Image.asset(
+                      "../assets/rules/page_${widget.card!.infoPage}.png",
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        height: 90,
+                        width: 125,
+                        color: CustomColors.greyInfo,
+                      ),
+                    ),
+                  ]
                 ),
                 Positioned(
-                  bottom: 0,
+                  top: 200,
                   right: 0,
-                  child: Container(
-                    height: 90,
-                    width: 125,
-                    color: CustomColors.greyInfo,
-                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _isClosing = true;
+                      });
+                    },
+                    icon: const Icon(Icons.cancel, size: 80.0),
+                  ),  
                 ),
-              ]
+              ],
             ),
-            Positioned(
-              top: 200,
-              right: 0,
-              child: IconButton(
-                onPressed: () {
-                  widget.close(null);
-                },
-                icon: const Icon(Icons.cancel, size: 80.0),
-              ),  
-            ),
-          ],
-        ),
-      );
-    }
-    else {return const SizedBox.shrink();}
+          ),
+        );
+      }
+    );
   }
 }

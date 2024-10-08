@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'game_models.dart'; // models of cards, game and players, cards data
 
+import 'main.dart';
+
 class ImageCarousel extends StatefulWidget {
   final List<String> imageAssets; // Список адресов изображений
   final int sectionNumber; // Номер раздела для формирования айди карты
@@ -17,10 +19,10 @@ class ImageCarousel extends StatefulWidget {
   });
 
   @override
-  _ImageCarouselState createState() => _ImageCarouselState();
+  ImageCarouselState createState() => ImageCarouselState();
 }
 
-class _ImageCarouselState extends State<ImageCarousel> {
+class ImageCarouselState extends State<ImageCarousel> {
   int _currentImageIndex = 0; // Индекс текущего изображения
   final CarouselSliderController _carouselController = CarouselSliderController(); // Создаем контроллер
 
@@ -30,6 +32,15 @@ class _ImageCarouselState extends State<ImageCarousel> {
     }
     else {
       return assistCards[_currentImageIndex];
+    }
+  }
+
+  bool _isPicked() {
+    if (widget.sectionNumber < 4) {
+      return selectedCharacterCards.contains(characterCards[widget.sectionNumber*7 + _currentImageIndex]);
+    }
+    else {
+      return selectedAssistCards.contains(assistCards[_currentImageIndex]);
     }
   }
 
@@ -57,17 +68,36 @@ class _ImageCarouselState extends State<ImageCarousel> {
                   ),
                   child: GestureDetector(
                     onTap: () {
+                      CardGameApp.isCardMovingToSlot = true;
                       widget.pick(_currentCard());
                     },
-                    child: Container(
-                      decoration: const BoxDecoration(),
+                    child: _isPicked() ? Container(
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(
+                            "../assets/images/blockedCard.png",
+                          ),
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "ВЫБРАНО",
+                          style: TextStyle(
+                            color: Colors.black,
+                            backgroundColor: Colors.white,
+                            fontSize: 30,
+                          ),
+                        ),
+                      ),
+                    ) : Container(
+                      decoration: const BoxDecoration(color: Color.fromARGB(0, 0, 0, 0)),
                     )
                   ),
                 ),
               );
             }).toList(),
             options: CarouselOptions(
-              scrollPhysics: ScrollPhysics(parent: NeverScrollableScrollPhysics()), // Не листается by drag of the carousel
+              scrollPhysics: const ScrollPhysics(parent: NeverScrollableScrollPhysics()), // Не листается by drag of the carousel
               height: 550.0, // Высота карусели
               viewportFraction: 1.0, // Занимает всю ширину экрана
               enlargeCenterPage: false, // Без увеличения центрального изображения

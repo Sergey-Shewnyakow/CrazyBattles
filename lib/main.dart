@@ -5,30 +5,29 @@ import 'package:flutter_animate/flutter_animate.dart'; // animations lib
 import 'package:loading_animation_widget/loading_animation_widget.dart'; // beautiful loading animations lib
 import 'package:figma_squircle/figma_squircle.dart'; // package for rounded corners
 
+import 'card_chooser.dart';//logic of choosing cards and starting
 import 'card_information_view.dart'; //for viewing info about card on click the info button
-import 'bordered_square.dart'; //bordered square for class choose
 import 'custom_shadows.dart'; //custom box shadows
 import 'game_models.dart'; // models of cards, game and players, cards data
-import 'carousel.dart';//carousel for card choose implementation
-import 'expandable_panel.dart';//panels that become huge on click
 import 'custom_colors.dart';//custom colors
-import 'card_slot.dart';//slot for card in menu
 
 // Виджет игры
 class CardGameApp extends StatefulWidget {
+  static bool isCardMovingToSlot = false;
+  const CardGameApp({super.key});
+
   @override
-  _CardGameAppState createState() => _CardGameAppState();
+  CardGameAppState createState() => CardGameAppState();
 }
 
-class _CardGameAppState extends State<CardGameApp> {
+class CardGameAppState extends State<CardGameApp> {
   GameModel? game;
   int inLobby = 0; // 0 = menu 1 = opponent search 2 = game screen
-  int cardsSectionNum = 0;
   CardModel? cardInfoFor;
+  CardModel? _movableCard;
   DateTime _timeStart = DateTime.now();
   String _timeStopwatch= "";
   bool _isTimerStarted = false;
-  List<Slot> slots = [];
 
   //void _gotoRools() {
   // TODO: запуск меню правил
@@ -42,13 +41,6 @@ class _CardGameAppState extends State<CardGameApp> {
 
   @override
   void initState() {
-    slots = [
-      Slot(isAssist: true, slotNumber: 0, reload: _selectAssistCard),
-      Slot(isAssist: false, slotNumber: 0, reload: _selectCharacterCard),
-      Slot(isAssist: false, slotNumber: 1, reload: _selectCharacterCard),
-      Slot(isAssist: false, slotNumber: 2, reload: _selectCharacterCard),
-      Slot(isAssist: true, slotNumber: 1, reload: _selectAssistCard),
-    ];
     Timer.periodic(
       const Duration(seconds: 1),
       (timer) {
@@ -82,43 +74,45 @@ class _CardGameAppState extends State<CardGameApp> {
     }
   }
 
-  // Выбор карт персонажей
-  void _selectCharacterCard(CardModel card) {
-    if (selectedCharacterCards.contains(card)) {// removing card
-      selectedCharacterCards.remove(card);
-      _reloadCharacterCards();
-      setState(() {});
-    } else if (selectedCharacterCards.length < 3) {// adding card
-      selectedCharacterCards.add(card);
-      _reloadCharacterCards();
-      setState(() {});
-    }
+  void _moveCardToSlot(CardModel card) {
+    setState(() {
+      _movableCard = card;
+    });
   }
 
-  void _reloadCharacterCards() {
-    for (int i = 0; i < 3; i++) {
-      slots[i+1] = Slot(isAssist: false, slotNumber: i, reload: _selectCharacterCard);//slots[1,2,3]
-    }
-  }
-
-  // Выбор карт подмоги
-  void _selectAssistCard(CardModel card) {// removing card
-
-    if (selectedAssistCards.contains(card)) {
-      selectedAssistCards.remove(card);
-      _reloadAssistCards();
-      setState(() {});
-    } else if (selectedAssistCards.length < 2) {// adding card
-      selectedAssistCards.add(card);
-      _reloadAssistCards();
-      setState(() {});
-    }
-  }
-
-  void _reloadAssistCards() {
-    for (int i = 0; i < 2; i++) {
-      slots[i*4] = Slot(isAssist: true, slotNumber: i, reload: _selectAssistCard);//slots[0 & 4]
-    }
+  Widget _movingCard() {
+    if (_movableCard == null) return const SizedBox.shrink();
+    return Animate(
+      onComplete: (controller) => setState(() {
+        _movableCard = null;
+        CardGameApp.isCardMovingToSlot = false;
+      }),
+      effects: [
+        MoveEffect(
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.fastEaseInToSlowEaseOut,
+          begin: const Offset(360, 946),
+          end: _movableCard!.isAssist ? Offset(selectedAssistCards.length == 1 ? 180 : 2450, 4327)
+                                      : Offset(selectedCharacterCards.length == 1 ? 493
+                                              : selectedCharacterCards.length == 2 ? 913
+                                              : 1333, 2905),
+        ),
+        ScaleEffect(
+          duration: const Duration(milliseconds: 800),
+          begin: const Offset(1, 1),
+          end: _movableCard!.isAssist ? const Offset(0.27, 0.27) : const Offset(0.39, 0.39),
+        )
+      ],
+      child: Container(
+        width: 353,
+        height: 550,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(_movableCard!.asset),
+          ),
+        ),
+      ),
+    );
   }
 
   // TODO: выбор активной карты только для себя
@@ -129,12 +123,6 @@ class _CardGameAppState extends State<CardGameApp> {
   //    setState(() {});
   //  }
   //}
-
-  void backToClassChoose() {
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-      setState(() {cardsSectionNum = 0;})
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -198,64 +186,87 @@ class _CardGameAppState extends State<CardGameApp> {
               ),
               const SizedBox(height: 119),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 25,
-                ),
-                decoration: BoxDecoration(
-                  color: CustomColors.greyDark,
-                  borderRadius: BorderRadius.circular(51),
-                  border: Border.all(
-                    color: CustomColors.greyLight,
-                    width: 10,
+                padding: const EdgeInsets.all(10),
+                decoration: ShapeDecoration(
+                  shadows: CustomBoxShadows.shadowOnDark,
+                  color: CustomColors.greyLight,
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 51,
+                      cornerSmoothing: 1,
+                    ),
                   ),
-                  boxShadow: CustomBoxShadows.shadowOnDark
                 ),
-                width: 743,
-                child: Row( // TODO: account
-                  children: [
-                    Stack(
-                      alignment: AlignmentDirectional.center,
-                      children: [
-                        Image.asset(
-                          '../assets/images/missing_avatar.jpg',
-                          width: 167.2,
-                          height: 167.2,
-                        ),
-                        Container(
-                          width: 199,
-                          height: 199,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(35),
-                            border: Border.all(
-                              color: CustomColors.mainBright,
-                              width: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 25,
+                  ),
+                  decoration: ShapeDecoration(
+                    color: CustomColors.greyDark,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 41,
+                        cornerSmoothing: 1,
+                      ),
+                    ),
+                  ),
+                  width: 743,
+                  child: Row( // TODO: account
+                    children: [
+                      Stack(
+                        alignment: AlignmentDirectional.center,
+                        children: [
+                          Container(
+                            width: 199,
+                            height: 199,
+                            padding: const EdgeInsets.all(16),
+                            decoration: ShapeDecoration(
+                              shadows: CustomBoxShadows.shadowOnDark,
+                              color: CustomColors.greyLight,
+                              shape: SmoothRectangleBorder(
+                                borderRadius: SmoothBorderRadius(
+                                  cornerRadius: 51,
+                                  cornerSmoothing: 1,
+                                ),
+                              ),
+                            ),
+                            child: Container(
+                              decoration: ShapeDecoration(
+                                image: const DecorationImage(image: AssetImage('../assets/images/missing_avatar.jpg')),
+                                shape: SmoothRectangleBorder(
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 35,
+                                    cornerSmoothing: 1,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 40),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "ВЛАД ЛАХТА",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 46.9,
+                        ],
+                      ),
+                      const SizedBox(width: 40),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "ВЛАД ЛАХТА",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 46.9,
+                            ),
                           ),
-                        ),
-                        Text(
-                          "@lahta_vlad",
-                          style: TextStyle(
-                            color: CustomColors.greyText,
-                            fontSize: 31.15,
+                          Text(
+                            "@lahta_vlad",
+                            style: TextStyle(
+                              color: CustomColors.greyText,
+                              fontSize: 31.15,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 51),
@@ -295,346 +306,14 @@ class _CardGameAppState extends State<CardGameApp> {
             ],
           ),
         ),
-        SizedBox(
-          height: 1920,
-          width: 1080,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              ExpandablePanel(
-                addictionalBut: Stack(
-                  children: [
-                    Positioned(
-                      top: 1300,
-                      left: 180,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          slots[0],
-                          const SizedBox(width: 26),
-                          slots[1],
-                          const SizedBox(width: 26),
-                          slots[2],
-                          const SizedBox(width: 26),
-                          slots[3],
-                          const SizedBox(width: 26),
-                          slots[4],
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      left: 176,
-                      top: 1583.86,
-                      height: 130.81,
-                      width: 417.44,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          boxShadow: CustomBoxShadows.shadowOnDark
-                        ),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: CustomColors.mainBright,
-                            disabledBackgroundColor: CustomColors.greyLight,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
-                            shadowColor: CustomColors.darkShadowMain,
-                            elevation: 2,
-                            padding: EdgeInsets.zero,
-                          ),
-                          onPressed: selectedCharacterCards.length == 3 ? _goToOpponentSearch : null,
-                          child: Text(
-                            "ИГРАТЬ",
-                            style: TextStyle(
-                              color: selectedCharacterCards.length == 3 ? Colors.white : CustomColors.inactiveText,
-                              fontSize: 57
-                            )
-                          )
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                unload: backToClassChoose,
-                background: Container(
-                  decoration: BoxDecoration(
-                    color: CustomColors.greyLight,
-                    borderRadius: BorderRadius.circular(35),
-                    boxShadow: CustomBoxShadows.shadowOnDark
-                  ),
-                ),
-                title: const Text(
-                  "ИЗМЕНИТЬ\nСОСТАВ",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                content: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          cardsSectionNum = 0;
-                        });
-                      },
-                      child: Container(
-                        decoration: const BoxDecoration(),
-                      ),
-                    ),
-                    FittedBox(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            cardsSectionNum = 0;
-                          });
-                        },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      cardsSectionNum = 1;
-                                    });
-                                  },
-                                  child: BorderedSquare(
-                                    height: 250,
-                                    width: 250,
-                                    radius: 6,
-                                    child: SvgPicture.asset(
-                                      '../assets/images/icoSupport.svg',
-                                      fit: BoxFit.contain
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 44,),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      cardsSectionNum = 2;
-                                    });
-                                  },
-                                  child: BorderedSquare(
-                                    height: 250,
-                                    width: 250,
-                                    radius: 6,
-                                    child: SvgPicture.asset(
-                                      '../assets/images/icoDamagger.svg',
-                                      fit: BoxFit.contain
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 44),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      cardsSectionNum = 3;
-                                    });
-                                  },
-                                  child: BorderedSquare(
-                                    height: 250,
-                                    width: 250,
-                                    radius: 6,
-                                    child: SvgPicture.asset(
-                                      '../assets/images/icoHealer.svg',
-                                      fit: BoxFit.contain
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 44,),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      cardsSectionNum = 4;
-                                    });
-                                  },
-                                  child: BorderedSquare(
-                                    height: 250,
-                                    width: 250,
-                                    radius: 6,
-                                    child: SvgPicture.asset(
-                                      '../assets/images/icoShielder.svg',
-                                      fit: BoxFit.contain
-                                    ),
-                                  ),
-                                ),
-                              ]
-                            ),
-                            const SizedBox(height: 44),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  cardsSectionNum = 5;
-                                });
-                              },
-                              child: const BorderedSquare(
-                                height: 180,
-                                width: 544,
-                                radius: 6,
-                                child: Text(
-                                  "ПОДМОГА",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 30
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ]
-                        ),
-                      ),
-                    ),
-                    cardsSectionNum == 1 ?
-                      ExpandablePanel (
-                        minY: 215,
-                        maxY: 215,
-                        minX: 104,
-                        maxX: 104,
-                        minH: 250,
-                        maxH: 792,
-                        minW: 250,
-                        maxW: 544,
-                        minTO: 90,
-                        maxTO: 50,
-                        selfActivating: true,
-                        unload: backToClassChoose,
-                        background: const BorderedSquare(radius: 6),
-                        title: SvgPicture.asset(
-                          '../assets/images/icoSupport.svg',
-                          fit: BoxFit.contain
-                        ),
-                        content: ImageCarousel(
-                          imageAssets: characterCards.sublist((cardsSectionNum-1)*7, cardsSectionNum*7).map((card) => card.asset).toList(),
-                          sectionNumber: cardsSectionNum-1,
-                          pick: _selectCharacterCard,
-                          info: _loadInfo,
-                        ),
-                      )
-                    : cardsSectionNum == 2 ?
-                      ExpandablePanel (
-                        minY: 215,
-                        maxY: 215,
-                        minX: 104,
-                        maxX: 396,
-                        minH: 250,
-                        maxH: 792,
-                        minW: 250,
-                        maxW: 544,
-                        minTO: 90,
-                        maxTO: 50,
-                        selfActivating: true,
-                        unload: backToClassChoose,
-                        background: const BorderedSquare(radius: 6),
-                        title: SvgPicture.asset(
-                          '../assets/images/icoDamagger.svg',
-                          fit: BoxFit.contain
-                        ),
-                        content: ImageCarousel(
-                          imageAssets: characterCards.sublist((cardsSectionNum-1)*7, cardsSectionNum*7).map((card) => card.asset).toList(),
-                          sectionNumber: cardsSectionNum-1,
-                          pick: _selectCharacterCard,
-                          info: _loadInfo,
-                        ),
-                      )
-                    : cardsSectionNum == 3 ?
-                      ExpandablePanel (
-                        minY: 215,
-                        maxY: 509,
-                        minX: 104,
-                        maxX: 104,
-                        minH: 250,
-                        maxH: 792,
-                        minW: 250,
-                        maxW: 544,
-                        minTO: 90,
-                        maxTO: 50,
-                        selfActivating: true,
-                        unload: backToClassChoose,
-                        background: const BorderedSquare(radius: 6),
-                        title: SvgPicture.asset(
-                          '../assets/images/icoHealer.svg',
-                          fit: BoxFit.contain
-                        ),
-                        content: ImageCarousel(
-                          imageAssets: characterCards.sublist((cardsSectionNum-1)*7, cardsSectionNum*7).map((card) => card.asset).toList(),
-                          sectionNumber: cardsSectionNum-1,
-                          pick: _selectCharacterCard,
-                          info: _loadInfo,
-                        ),
-                      )
-                    : cardsSectionNum == 4 ?
-                      ExpandablePanel (
-                        minY: 215,
-                        maxY: 509,
-                        minX: 104,
-                        maxX: 396,
-                        minH: 250,
-                        maxH: 792,
-                        minW: 250,
-                        maxW: 544,
-                        minTO: 80,
-                        maxTO: 40,
-                        selfActivating: true,
-                        unload: backToClassChoose,
-                        background: const BorderedSquare(radius: 6),
-                        title: SvgPicture.asset(
-                          '../assets/images/icoShielder.svg',
-                          fit: BoxFit.contain
-                        ),
-                        content: ImageCarousel(
-                          imageAssets: characterCards.sublist((cardsSectionNum-1)*7, cardsSectionNum*7).map((card) => card.asset).toList(),
-                          sectionNumber: cardsSectionNum-1,
-                          pick: _selectCharacterCard,
-                          info: _loadInfo,
-                        ),
-                      )
-                    : cardsSectionNum == 5 ?
-                      ExpandablePanel (
-                        minY: 215,
-                        maxY: 804,
-                        minX: 104,
-                        maxX: 104,
-                        minH: 180,
-                        maxH: 792,
-                        minW: 544,
-                        maxW: 544,
-                        minTO: 75,
-                        maxTO: 50,
-                        selfActivating: true,
-                        unload: backToClassChoose,
-                        background: const BorderedSquare(radius: 6),
-                        title: const Text(
-                          "ПОДМОГА",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 30
-                          ),
-                        ),
-                        content: ImageCarousel(
-                          imageAssets: assistCards.map((card) => card.asset).toList(),
-                          sectionNumber: cardsSectionNum-1,
-                          pick: _selectAssistCard,
-                          info: _loadInfo,
-                        ),
-                      )
-                    : const SizedBox(),
-                  ]
-                ),
-              ),
-            ],
-          ),
+        CardChooser(
+          startOpponentSearch: _goToOpponentSearch,
+          animate: _moveCardToSlot,
+          loadInfo: _loadInfo,
+          isCardMovingToSlot: CardGameApp.isCardMovingToSlot,
         ),
-        InfoCard(card: cardInfoFor, close: _loadInfo,),
+        InfoCard(card: cardInfoFor, close: _loadInfo),
+        _movingCard(),
       ],
     );
   }
@@ -779,7 +458,7 @@ class _CardGameAppState extends State<CardGameApp> {
   }
 
   // Виджет карты
-  //TODO: change to sth that views card's visual
+  //TODO: change to smth that views card's visual
   //Widget _buildCardWidget(CardModel card, bool isSelected, Function(CardModel)? onTap) {
   //  return GestureDetector(
   //    onTap: () => onTap!(card),
@@ -853,4 +532,4 @@ class _CardGameAppState extends State<CardGameApp> {
   //}
 }
 
-void main() => runApp(CardGameApp());
+void main() => runApp(const CardGameApp());

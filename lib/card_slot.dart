@@ -7,19 +7,21 @@ class Slot extends StatefulWidget {
   final bool isAssist;
   final int slotNumber;
   final Function(CardModel) reload;
+  final Function(bool) openTheChooser;
 
   const Slot({
     super.key, 
     required this.isAssist,
     required this.slotNumber,
     required this.reload,
+    required this.openTheChooser,
   });
 
   @override
-  _SlotState createState() => _SlotState();
+  SlotState createState() => SlotState();
 }
 
-class _SlotState extends State<Slot> {
+class SlotState extends State<Slot> {
   double _radius = 0;
   double _width = 0;
   double _height = 0;
@@ -52,6 +54,9 @@ class _SlotState extends State<Slot> {
             } else {
               widget.reload(card);
             }
+          }
+          else {
+            widget.openTheChooser(widget.isAssist);
           }
         },
         child: Container(
