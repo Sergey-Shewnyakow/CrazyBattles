@@ -19,6 +19,7 @@ class ExpandablePanel extends StatefulWidget {
   final bool selfActivating;
   final int forcedActivating;//activating (1) or deactivating (-1) by something else
   final Function? unload;
+  final Function(bool)? onActive;
   
   const ExpandablePanel({
     super.key,
@@ -38,6 +39,7 @@ class ExpandablePanel extends StatefulWidget {
     required this.selfActivating,
     this.forcedActivating = 0,
     this.unload,
+    this.onActive,
     this.addictionalBut,
   });
 
@@ -148,6 +150,7 @@ class ExpandablePanelState extends SomeExpandablePanelState {//for class choose 
   
   @override
   Widget panel() {
+    widget.onActive!(_isExpanded);
     return GestureDetector( //для обработки нажатий по панели
       onTap: () {
         _controller.forward();

@@ -1,8 +1,7 @@
+import 'package:crazy_battles/opponent_search.dart';
 import 'package:flutter/material.dart'; // flutter visual lib
-import 'dart:async'; // async lib
 import 'package:flutter_svg/flutter_svg.dart'; // svg lib
 import 'package:flutter_animate/flutter_animate.dart'; // animations lib
-import 'package:loading_animation_widget/loading_animation_widget.dart'; // beautiful loading animations lib
 import 'package:figma_squircle/figma_squircle.dart'; // package for rounded corners
 
 import 'card_chooser.dart'; //logic of choosing cards and starting
@@ -24,34 +23,16 @@ class CardGameAppState extends State<CardGameApp> {
   GameModel? game;
   int inLobby = 0; // 0 = menu 1 = opponent search 2 = game screen
   int inLobbyPrev = 0;
+  bool _isProfileAnimated = true;
   CardModel? cardInfoFor;
   CardModel? _movableCard;
-  DateTime _timeStart = DateTime.now();
-  String _timeStopwatch = "";
-  bool _isTimerStarted = false;
 
   //void _gotoRools() {
   // TODO: запуск меню правил
   //}
 
   void _goToOpponentSearch() {
-    _timeStart = DateTime.now();
-    _isTimerStarted = false;
-    setState(() {
-      inLobby = 1;
-    });
-  }
-
-  @override
-  void initState() {
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      int timeNow = DateTime.now().difference(_timeStart).inSeconds.toInt();
-      setState(() {
-        _timeStopwatch =
-            "${timeNow ~/ 60}:${timeNow % 60 < 10 ? "0" : ""}${timeNow % 60}";
-      });
-    });
-    super.initState();
+    setState(() {inLobby = 1;});
   }
 
   // Запуск игры с выбранными картами
@@ -140,7 +121,7 @@ class CardGameAppState extends State<CardGameApp> {
     Widget staticWidg = inLobby == 0
         ? _buildLobby()
         : inLobby == 1
-            ? _opponentSearch()
+            ? const OpponentSearch()
             : _gameScreen();
     return inLobby == inLobbyPrev ? staticWidg : animatedScreens();
   }
@@ -248,94 +229,185 @@ class CardGameAppState extends State<CardGameApp> {
                             ),
                           ),
                           const SizedBox(height: 119),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: ShapeDecoration(
-                              shadows: CustomBoxShadows.shadowOnDark,
-                              color: CustomColors.greyLight,
-                              shape: SmoothRectangleBorder(
-                                borderRadius: SmoothBorderRadius(
-                                  cornerRadius: 51,
-                                  cornerSmoothing: 1,
-                                ),
-                              ),
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 25,
-                              ),
-                              decoration: ShapeDecoration(
-                                color: CustomColors.greyDark,
-                                shape: SmoothRectangleBorder(
-                                  borderRadius: SmoothBorderRadius(
-                                    cornerRadius: 41,
-                                    cornerSmoothing: 1,
-                                  ),
-                                ),
-                              ),
-                              width: 743,
-                              child: Row(
-                                // TODO: account
+                          Stack(
+                            children: [
+                              if (_isProfileAnimated) Stack(
                                 children: [
-                                  Stack(
-                                    alignment: AlignmentDirectional.center,
-                                    children: [
-                                      Container(
-                                        width: 199,
-                                        height: 199,
-                                        padding: const EdgeInsets.all(16),
+                                  Animate(
+                                    onComplete: (controller) => controller.repeat(),
+                                    effects: const [
+                                      ScaleEffect(
+                                        duration: Duration(milliseconds: 4000),
+                                        begin: Offset(1, 1),
+                                        end: Offset(1.2, 1.56),
+                                      ),
+                                      FadeEffect(
+                                        curve: Curves.easeOutCubic,
+                                        duration: Duration(milliseconds: 4000),
+                                        begin: 0.6,
+                                        end: 0,
+                                      )
+                                    ],
+                                    child: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      height: 270,
+                                      width: 764,
+                                      decoration: ShapeDecoration(
+                                        color: CustomColors.greyLight,
+                                        shape: SmoothRectangleBorder(
+                                          borderRadius: SmoothBorderRadius(
+                                            cornerRadius: 51,
+                                            cornerSmoothing: 1,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Container(
                                         decoration: ShapeDecoration(
-                                          shadows:
-                                              CustomBoxShadows.shadowOnDark,
-                                          color: CustomColors.mainBright,
+                                          color: CustomColors.greyDark,
                                           shape: SmoothRectangleBorder(
                                             borderRadius: SmoothBorderRadius(
-                                              cornerRadius: 51,
+                                              cornerRadius: 41,
                                               cornerSmoothing: 1,
                                             ),
                                           ),
                                         ),
-                                        child: Container(
-                                          decoration: ShapeDecoration(
-                                            image: const DecorationImage(
-                                                image: AssetImage(
-                                                    '../assets/images/missing_avatar.jpg')),
-                                            shape: SmoothRectangleBorder(
-                                              borderRadius: SmoothBorderRadius(
-                                                cornerRadius: 35,
-                                                cornerSmoothing: 1,
-                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                  Animate(
+                                    delay: const Duration(milliseconds: 2000),
+                                    onComplete: (controller) => controller.repeat(),
+                                    effects: const [
+                                      ScaleEffect(
+                                        duration: Duration(milliseconds: 4000),
+                                        begin: Offset(1, 1),
+                                        end: Offset(1.2, 1.56),
+                                      ),
+                                      FadeEffect(
+                                        curve: Curves.easeOutCubic,
+                                        duration: Duration(milliseconds: 4000),
+                                        begin: 0.6,
+                                        end: 0,
+                                      )
+                                    ],
+                                    child: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      height: 270,
+                                      width: 764,
+                                      decoration: ShapeDecoration(
+                                        color: CustomColors.greyLight,
+                                        shape: SmoothRectangleBorder(
+                                          borderRadius: SmoothBorderRadius(
+                                            cornerRadius: 51,
+                                            cornerSmoothing: 1,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Container(
+                                        decoration: ShapeDecoration(
+                                          color: CustomColors.greyDark,
+                                          shape: SmoothRectangleBorder(
+                                            borderRadius: SmoothBorderRadius(
+                                              cornerRadius: 41,
+                                              cornerSmoothing: 1,
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 40),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        "ВЛАД ЛАХТА",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 46.9,
-                                        ),
-                                      ),
-                                      Text(
-                                        "@lahta_vlad",
-                                        style: TextStyle(
-                                          color: CustomColors.greyText,
-                                          fontSize: 31.15,
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: ShapeDecoration(
+                                  shadows: CustomBoxShadows.shadowOnDark,
+                                  color: CustomColors.greyLight,
+                                  shape: SmoothRectangleBorder(
+                                    borderRadius: SmoothBorderRadius(
+                                      cornerRadius: 41,
+                                      cornerSmoothing: 1,
+                                    ),
+                                  ),
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 25,
+                                  ),
+                                  decoration: ShapeDecoration(
+                                    color: CustomColors.greyDark,
+                                    shape: SmoothRectangleBorder(
+                                      borderRadius: SmoothBorderRadius(
+                                        cornerRadius: 41,
+                                        cornerSmoothing: 1,
+                                      ),
+                                    ),
+                                  ),
+                                  width: 743,
+                                  child: Row(
+                                    // TODO: account
+                                    children: [
+                                      Stack(
+                                        alignment: AlignmentDirectional.center,
+                                        children: [
+                                          Container(
+                                            width: 199,
+                                            height: 199,
+                                            padding: const EdgeInsets.all(16),
+                                            decoration: ShapeDecoration(
+                                              shadows:
+                                                  CustomBoxShadows.shadowOnDark,
+                                              color: CustomColors.mainBright,
+                                              shape: SmoothRectangleBorder(
+                                                borderRadius: SmoothBorderRadius(
+                                                  cornerRadius: 51,
+                                                  cornerSmoothing: 1,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Container(
+                                              decoration: ShapeDecoration(
+                                                image: const DecorationImage(
+                                                    image: AssetImage(
+                                                        '../assets/images/missing_avatar.jpg')),
+                                                shape: SmoothRectangleBorder(
+                                                  borderRadius: SmoothBorderRadius(
+                                                    cornerRadius: 35,
+                                                    cornerSmoothing: 1,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(width: 40),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "ВЛАД ЛАХТА",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 46.9,
+                                            ),
+                                          ),
+                                          Text(
+                                            "@lahta_vlad",
+                                            style: TextStyle(
+                                              color: CustomColors.greyText,
+                                              fontSize: 31.15,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 51),
                           Stack(
@@ -396,7 +468,7 @@ class CardGameAppState extends State<CardGameApp> {
                       startOpponentSearch: _goToOpponentSearch,
                       animate: _moveCardToSlot,
                       loadInfo: _loadInfo,
-                      isCardMovingToSlot: CardGameApp.isCardMovingToSlot,
+                      onPanelActive: setIsProfileAnimated,
                     ),
                     InfoCard(card: cardInfoFor, close: _loadInfo),
                     _movingCard(),
@@ -410,171 +482,11 @@ class CardGameAppState extends State<CardGameApp> {
     );
   }
 
-  Widget _opponentSearch() {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: 'syncopate'),
-      home: Scaffold(
-        backgroundColor: CustomColors.greyDark,
-        body: Center(
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: SizedBox(
-              width: 1080,
-              height: 1920,
-              child: Animate(
-                effects: const [
-                  FadeEffect(
-                    duration: Duration(milliseconds: 1000),
-                    curve: Curves.easeOutCubic,
-                  )
-                ],
-                child: Stack(
-                  alignment: AlignmentDirectional.topCenter,
-                  children: [
-                    Animate(
-                      onPlay: (controller) => _isTimerStarted = true,
-                      effects: const [
-                        MoveEffect(
-                          delay: Duration(milliseconds: 1000),
-                          duration: Duration(milliseconds: 500),
-                          curve: Curves.easeOutCubic,
-                          begin: Offset(0, -150),
-                          end: Offset(0, 0),
-                        )
-                      ],
-                      child: Positioned(
-                        top: 560,
-                        child: Container(
-                          width: 400,
-                          height: 160,
-                          padding: const EdgeInsets.all(8),
-                          decoration: ShapeDecoration(
-                            shadows: CustomBoxShadows.shadowOnDark,
-                            color: CustomColors.greyLight,
-                            shape: SmoothRectangleBorder(
-                              borderRadius: SmoothBorderRadius(
-                                cornerRadius: 30,
-                                cornerSmoothing: 1,
-                              ),
-                            ),
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: ShapeDecoration(
-                              color: CustomColors.greyDark,
-                              shape: SmoothRectangleBorder(
-                                borderRadius: SmoothBorderRadius(
-                                  cornerRadius: 20,
-                                  cornerSmoothing: 1,
-                                ),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  top: 30, left: 20, right: 20),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SvgPicture.asset(
-                                    '../assets/images/icoClock.svg',
-                                    fit: BoxFit.contain,
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 7),
-                                    child: Text(
-                                      _isTimerStarted ? _timeStopwatch : "0:00",
-                                      style: TextStyle(
-                                          color: CustomColors.greyLight,
-                                          fontSize: 60),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 200,
-                      child: Container(
-                        width: 778,
-                        height: 384,
-                        padding: const EdgeInsets.all(10),
-                        decoration: ShapeDecoration(
-                          shadows: CustomBoxShadows.shadowOnDark,
-                          color: CustomColors.greyLight,
-                          shape: SmoothRectangleBorder(
-                            borderRadius: SmoothBorderRadius(
-                              cornerRadius: 54,
-                              cornerSmoothing: 1,
-                            ),
-                          ),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: ShapeDecoration(
-                            color: CustomColors.greyDark,
-                            shape: SmoothRectangleBorder(
-                              borderRadius: SmoothBorderRadius(
-                                cornerRadius: 44,
-                                cornerSmoothing: 1,
-                              ),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(75),
-                            child: SizedBox(
-                              child: SvgPicture.asset(
-                                '../assets/images/logo.svg',
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 940,
-                      child: LoadingAnimationWidget.stretchedDots(
-                        color: CustomColors.mainBright,
-                        size: 200,
-                      ),
-                    ),
-                    Positioned(
-                      top: 1350,
-                      child: Animate(
-                        onPlay: (controller) => controller.repeat(),
-                        effects: [
-                          ShimmerEffect(
-                              color: CustomColors.mainBright,
-                              delay: const Duration(milliseconds: 1000),
-                              duration: const Duration(milliseconds: 2000))
-                        ],
-                        child: const Padding(
-                          padding: EdgeInsets.only(top: 10),
-                          child: Text(
-                            "ПОИСК\nСОПЕРНИКА",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              height: 0.85,
-                              color: Colors.white,
-                              fontSize: 100,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  void setIsProfileAnimated(bool value) {
+    if (_isProfileAnimated == !value) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {
+      _isProfileAnimated = !value;
+    }));
   }
 
   // Виджет карты

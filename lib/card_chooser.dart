@@ -1,5 +1,4 @@
 import 'package:crazy_battles/main.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // svg lib
 import 'package:figma_squircle/figma_squircle.dart'; // package for rounded corners
@@ -15,14 +14,14 @@ class CardChooser extends StatefulWidget {
   final Function startOpponentSearch;
   final Function(CardModel) animate;
   final Function(CardModel) loadInfo;
-  final bool isCardMovingToSlot;
+  final Function(bool) onPanelActive;
 
   const CardChooser({
     super.key,
     required this.startOpponentSearch,
     required this.animate,
     required this.loadInfo,
-    required this.isCardMovingToSlot,
+    required this.onPanelActive,
   });
 
   @override
@@ -113,7 +112,7 @@ class CardChooserState extends State<CardChooser> {
   @override
   void didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!widget.isCardMovingToSlot) {
+    if (!CardGameApp.isCardMovingToSlot) {
       _reloadCharacterCards();
       _reloadAssistCards();
     }
@@ -227,6 +226,7 @@ class CardChooserState extends State<CardChooser> {
         ],
       ),
       unload: backToClassChoose,
+      onActive: widget.onPanelActive,
       background: Container(
         decoration: ShapeDecoration(
           shadows: CustomBoxShadows.shadowOnDark,
@@ -270,95 +270,133 @@ class CardChooserState extends State<CardChooser> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        cardsSectionNum = 1;
-                      });
-                    },
-                    child: Container(
-                      height: 250,
-                      width: 250,
-                      decoration: ShapeDecoration(
-                        shadows: CustomBoxShadows.shadowOnDark,
-                        color: CustomColors.greyDark,
-                        shape: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 35,
-                            cornerSmoothing: 1,
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          cardsSectionNum = 1;
+                        });
+                      },
+                      child: Container(
+                        height: 250,
+                        width: 250,
+                        decoration: ShapeDecoration(
+                          shadows: CustomBoxShadows.shadowOnDark,
+                          color: CustomColors.greyDark,
+                          shape: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 35,
+                              cornerSmoothing: 1,
+                            ),
                           ),
                         ),
+                        child: SvgPicture.asset('../assets/images/icoSupport.svg',
+                            fit: BoxFit.scaleDown),
                       ),
-                      child: SvgPicture.asset('../assets/images/icoSupport.svg',
-                          fit: BoxFit.scaleDown),
                     ),
                   ),
-                  const SizedBox(
-                    width: 44,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        cardsSectionNum = 2;
-                      });
-                    },
-                    child: Container(
-                      height: 250,
-                      width: 250,
-                      decoration: ShapeDecoration(
-                        shadows: CustomBoxShadows.shadowOnDark,
-                        color: CustomColors.greyDark,
-                        shape: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 35,
-                            cornerSmoothing: 1,
+                  const SizedBox(width: 44),
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          cardsSectionNum = 2;
+                        });
+                      },
+                      child: Container(
+                        height: 250,
+                        width: 250,
+                        decoration: ShapeDecoration(
+                          shadows: CustomBoxShadows.shadowOnDark,
+                          color: CustomColors.greyDark,
+                          shape: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 35,
+                              cornerSmoothing: 1,
+                            ),
                           ),
                         ),
+                        child: SvgPicture.asset(
+                            '../assets/images/icoDamagger.svg',
+                            fit: BoxFit.scaleDown),
                       ),
-                      child: SvgPicture.asset(
-                          '../assets/images/icoDamagger.svg',
-                          fit: BoxFit.scaleDown),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 44),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      cardsSectionNum = 3;
-                    });
-                  },
-                  child: Container(
-                    height: 250,
-                    width: 250,
-                    decoration: ShapeDecoration(
-                      shadows: CustomBoxShadows.shadowOnDark,
-                      color: CustomColors.greyDark,
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 35,
-                          cornerSmoothing: 1,
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        cardsSectionNum = 3;
+                      });
+                    },
+                    child: Container(
+                      height: 250,
+                      width: 250,
+                      decoration: ShapeDecoration(
+                        shadows: CustomBoxShadows.shadowOnDark,
+                        color: CustomColors.greyDark,
+                        shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 35,
+                            cornerSmoothing: 1,
+                          ),
                         ),
                       ),
+                      child: SvgPicture.asset('../assets/images/icoHealer.svg',
+                          fit: BoxFit.scaleDown),
                     ),
-                    child: SvgPicture.asset('../assets/images/icoHealer.svg',
-                        fit: BoxFit.scaleDown),
                   ),
                 ),
                 const SizedBox(
                   width: 44,
                 ),
-                GestureDetector(
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        cardsSectionNum = 4;
+                      });
+                    },
+                    child: Container(
+                      height: 250,
+                      width: 250,
+                      decoration: ShapeDecoration(
+                        shadows: CustomBoxShadows.shadowOnDark,
+                        color: CustomColors.greyDark,
+                        shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 35,
+                            cornerSmoothing: 1,
+                          ),
+                        ),
+                      ),
+                      child: SvgPicture.asset('../assets/images/icoShielder.svg',
+                          fit: BoxFit.scaleDown),
+                    ),
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 44),
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      cardsSectionNum = 4;
+                      cardsSectionNum = 5;
                     });
                   },
                   child: Container(
-                    height: 250,
-                    width: 250,
+                    height: 180,
+                    width: 544,
+                    alignment: Alignment.center,
                     decoration: ShapeDecoration(
                       shadows: CustomBoxShadows.shadowOnDark,
                       color: CustomColors.greyDark,
@@ -369,35 +407,10 @@ class CardChooserState extends State<CardChooser> {
                         ),
                       ),
                     ),
-                    child: SvgPicture.asset('../assets/images/icoShielder.svg',
-                        fit: BoxFit.scaleDown),
-                  ),
-                ),
-              ]),
-              const SizedBox(height: 44),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    cardsSectionNum = 5;
-                  });
-                },
-                child: Container(
-                  height: 180,
-                  width: 544,
-                  alignment: Alignment.center,
-                  decoration: ShapeDecoration(
-                    shadows: CustomBoxShadows.shadowOnDark,
-                    color: CustomColors.greyDark,
-                    shape: SmoothRectangleBorder(
-                      borderRadius: SmoothBorderRadius(
-                        cornerRadius: 35,
-                        cornerSmoothing: 1,
-                      ),
+                    child: const Text(
+                      "ПОДМОГА",
+                      style: TextStyle(color: Colors.white, fontSize: 30),
                     ),
-                  ),
-                  child: const Text(
-                    "ПОДМОГА",
-                    style: TextStyle(color: Colors.white, fontSize: 30),
                   ),
                 ),
               ),
