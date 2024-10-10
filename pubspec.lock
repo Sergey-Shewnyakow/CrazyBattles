@@ -25,14 +25,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
-  buffer:
-    dependency: transitive
-    description:
-      name: buffer
-      sha256: "389da2ec2c16283c8787e0adaede82b1842102f8c8aae2f49003a766c5c6b3d1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.3"
   carousel_slider:
     dependency: "direct main"
     description:
@@ -155,14 +147,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
-  indexed:
-    dependency: transitive
-    description:
-      name: indexed
-      sha256: "3509a2a7ad1dbd7280da377661129e0b0a2f5e8d6d75f10400f07397f95324df"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.8"
   leak_tracker:
     dependency: transitive
     description:
@@ -219,6 +203,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.16+1"
+  material:
+    dependency: transitive
+    description:
+      name: material
+      sha256: "7f3a2edadf60e3a8771b843baff931d4b2e7205d015059c3abe315344f23dfa4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0+2"
   material_color_utilities:
     dependency: transitive
     description:
@@ -243,22 +235,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.20.0"
-  mysql_client_plus:
+  mysql1_ext:
     dependency: transitive
     description:
-      name: mysql_client_plus
-      sha256: c36ec420598c1c263ec97a4ac5b26ccec19f44ab85eb1de9775dbbae843e226d
+      name: mysql1_ext
+      sha256: "11f8df00dcf9713644a88b85d9f5ac6bca964030f193e26fac2f4472e5933e60"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.30"
-  mysql_utils:
-    dependency: transitive
-    description:
-      name: mysql_utils
-      sha256: e8aeeeff2a88eb6939769977e2d1c8141374ff2a6965a53b6cce5fccd9eebd4a
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.5"
+    version: "0.0.4"
   path:
     dependency: transitive
     description:
@@ -360,14 +344,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-  tuple:
-    dependency: transitive
-    description:
-      name: tuple
-      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:

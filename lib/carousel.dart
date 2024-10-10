@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'game_models.dart'; // models of cards, game and players, cards data
@@ -24,22 +26,28 @@ class ImageCarousel extends StatefulWidget {
 
 class ImageCarouselState extends State<ImageCarousel> {
   int _currentImageIndex = 0; // Индекс текущего изображения
-  final CarouselSliderController _carouselController = CarouselSliderController(); // Создаем контроллер
+  final CarouselSliderController _carouselController =
+      CarouselSliderController(); // Создаем контроллер
+  List<String> abaddonedCards = [
+    '../assets/images/abaddonedCards/abaddonedCard1.png',
+    '../assets/images/abaddonedCards/abaddonedCard2.png',
+    '../assets/images/abaddonedCards/abaddonedCard3.png',
+    '../assets/images/abaddonedCards/abaddonedCard4.png'
+  ];
 
   CardModel _currentCard() {
     if (widget.sectionNumber < 4) {
-      return characterCards[widget.sectionNumber*7 + _currentImageIndex];
-    }
-    else {
+      return characterCards[widget.sectionNumber * 7 + _currentImageIndex];
+    } else {
       return assistCards[_currentImageIndex];
     }
   }
 
   bool _isPicked() {
     if (widget.sectionNumber < 4) {
-      return selectedCharacterCards.contains(characterCards[widget.sectionNumber*7 + _currentImageIndex]);
-    }
-    else {
+      return selectedCharacterCards.contains(
+          characterCards[widget.sectionNumber * 7 + _currentImageIndex]);
+    } else {
       return selectedAssistCards.contains(assistCards[_currentImageIndex]);
     }
   }
@@ -57,7 +65,7 @@ class ImageCarouselState extends State<ImageCarousel> {
               return MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: Container(
-                  width: 550*0.643, // Ширина экрана
+                  width: 550 * 0.643, // Ширина экрана
                   margin: const EdgeInsets.symmetric(horizontal: 5.0),
                   decoration: BoxDecoration(
                     image: DecorationImage(
@@ -67,40 +75,35 @@ class ImageCarouselState extends State<ImageCarousel> {
                     ),
                   ),
                   child: GestureDetector(
-                    onTap: () {
-                      CardGameApp.isCardMovingToSlot = true;
-                      widget.pick(_currentCard());
-                    },
-                    child: _isPicked() ? Container(
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage(
-                            "../assets/images/blockedCard.png",
-                          ),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "ВЫБРАНО",
-                          style: TextStyle(
-                            color: Colors.black,
-                            backgroundColor: Colors.white,
-                            fontSize: 30,
-                          ),
-                        ),
-                      ),
-                    ) : Container(
-                      decoration: const BoxDecoration(color: Color.fromARGB(0, 0, 0, 0)),
-                    )
-                  ),
+                      onTap: () {
+                        CardGameApp.isCardMovingToSlot = true;
+                        widget.pick(_currentCard());
+                      },
+                      child: _isPicked()
+                          ? Container(
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage(
+                                    abaddonedCards[_currentImageIndex % 4],
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Container(
+                              decoration: const BoxDecoration(
+                                  color: Color.fromARGB(0, 0, 0, 0)),
+                            )),
                 ),
               );
             }).toList(),
             options: CarouselOptions(
-              scrollPhysics: const ScrollPhysics(parent: NeverScrollableScrollPhysics()), // Не листается by drag of the carousel
+              scrollPhysics: const ScrollPhysics(
+                  parent:
+                      NeverScrollableScrollPhysics()), // Не листается by drag of the carousel
               height: 550.0, // Высота карусели
               viewportFraction: 1.0, // Занимает всю ширину экрана
-              enlargeCenterPage: false, // Без увеличения центрального изображения
+              enlargeCenterPage:
+                  false, // Без увеличения центрального изображения
               onPageChanged: (index, reason) {
                 setState(() {
                   _currentImageIndex = index;
@@ -126,7 +129,8 @@ class ImageCarouselState extends State<ImageCarousel> {
           top: 400.0,
           child: IconButton(
             onPressed: () {
-              _carouselController.previousPage( // Используем контроллер
+              _carouselController.previousPage(
+                // Используем контроллер
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
               );
@@ -140,7 +144,8 @@ class ImageCarouselState extends State<ImageCarousel> {
           top: 400.0,
           child: IconButton(
             onPressed: () {
-              _carouselController.nextPage( // Используем контроллер
+              _carouselController.nextPage(
+                // Используем контроллер
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
               );
