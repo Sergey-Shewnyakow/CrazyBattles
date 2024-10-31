@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'custom_shadows.dart';
+import '../../../../style/custom_shadows.dart';
 import 'package:flutter/material.dart'; // flutter visual lib
 import 'package:flutter_animate/flutter_animate.dart';
-import 'game_models.dart'; // models of cards, game and players, cards data
-import 'custom_colors.dart';//custom colors
+import '../../../../card_models.dart'; // models of cards, game and players, cards data
+import '../../../../style/custom_colors.dart';//custom colors
 
 class Slot extends StatefulWidget {
   final bool isAssist;
@@ -37,7 +37,7 @@ class SlotState extends State<Slot> with SingleTickerProviderStateMixin {
     _width = widget.isAssist ? 93.27 : 138.77;
     _height = widget.isAssist ? 144.94 : 215.64;
     _controller = AnimationController(vsync: this);
-    timer = Timer.periodic(const Duration(seconds: 8), (timer) => _tryToShake());
+    timer = Timer.periodic(const Duration(seconds: 3), (timer) => _tryToShake());
     super.initState();
   }
   

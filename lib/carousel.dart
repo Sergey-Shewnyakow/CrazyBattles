@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'game_models.dart'; // models of cards, game and players, cards data
+import 'card_models.dart'; // models of cards, game and players, cards data
 
-import 'main.dart';
-
-class ImageCarousel extends StatefulWidget {
+class CardCarousel extends StatefulWidget {
   final List<String> imageAssets; // Список адресов изображений
   final int sectionNumber; // Номер раздела для формирования айди карты
   final Function(CardModel) pick; // Функция для выбора карты
   final Function(CardModel) info; // Функция для вывода описания карты
 
-  const ImageCarousel({
+  const CardCarousel({
     super.key,
     required this.imageAssets,
     required this.sectionNumber,
@@ -19,18 +17,18 @@ class ImageCarousel extends StatefulWidget {
   });
 
   @override
-  ImageCarouselState createState() => ImageCarouselState();
+  CardCarouselState createState() => CardCarouselState();//TODO: check if it makes any sense to make it BLoC
 }
 
-class ImageCarouselState extends State<ImageCarousel> {
+class CardCarouselState extends State<CardCarousel> {
   int _currentImageIndex = 0; // Индекс текущего изображения
   final CarouselSliderController _carouselController =
       CarouselSliderController(); // Создаем контроллер
   List<String> abaddonedCards = [
-    '../assets/images/abaddonedCards/abaddonedCard1.png',
-    '../assets/images/abaddonedCards/abaddonedCard2.png',
-    '../assets/images/abaddonedCards/abaddonedCard3.png',
-    '../assets/images/abaddonedCards/abaddonedCard4.png'
+    'images/abaddonedCards/abaddonedCard1.png',
+    'images/abaddonedCards/abaddonedCard2.png',
+    'images/abaddonedCards/abaddonedCard3.png',
+    'images/abaddonedCards/abaddonedCard4.png'
   ];
 
   CardModel _currentCard() {
@@ -74,7 +72,6 @@ class ImageCarouselState extends State<ImageCarousel> {
                   ),
                   child: GestureDetector(
                       onTap: () {
-                        CardGameApp.isCardMovingToSlot = true;
                         widget.pick(_currentCard());
                       },
                       child: _isPicked()
@@ -88,8 +85,7 @@ class ImageCarouselState extends State<ImageCarousel> {
                               ),
                             )
                           : Container(
-                              decoration: const BoxDecoration(
-                                  color: Color.fromARGB(0, 0, 0, 0)),
+                              decoration: const BoxDecoration(color: Color.fromARGB(0, 0, 0, 0)),
                             )),
                 ),
               );

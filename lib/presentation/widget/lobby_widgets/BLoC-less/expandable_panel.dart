@@ -150,7 +150,7 @@ class ExpandablePanelState extends SomeExpandablePanelState {//for class choose 
   
   @override
   Widget panel() {
-    widget.onActive!(_isExpanded);
+    widget.onActive!(!_isExpanded);
     return GestureDetector( //для обработки нажатий по панели
       onTap: () {
         _controller.forward();

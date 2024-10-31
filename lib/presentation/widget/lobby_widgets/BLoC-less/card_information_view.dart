@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'game_models.dart'; // models of cards, game and players, cards data
-import 'custom_colors.dart';//custom colors
+import '../../../../card_models.dart'; // models of cards, game and players, cards data
+import '../../../../style/custom_colors.dart';//custom colors
 
 class InfoCard extends StatefulWidget {
   final CardModel? card;
@@ -16,7 +16,7 @@ class InfoCard extends StatefulWidget {
   InfoCardState createState() => InfoCardState();
 }
 
-class InfoCardState extends State<InfoCard> with SingleTickerProviderStateMixin {//TODO: check if it's possible to make common base class with expandable panels
+class InfoCardState extends State<InfoCard> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _isExpanded = false;
@@ -55,9 +55,7 @@ class InfoCardState extends State<InfoCard> with SingleTickerProviderStateMixin 
         widget.close(null);
       });
     }
-    else if (widget.card == null) {
-      return const SizedBox.shrink();
-    }
+    else if (widget.card == null) {return const SizedBox.shrink();}
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -73,7 +71,7 @@ class InfoCardState extends State<InfoCard> with SingleTickerProviderStateMixin 
                   alignment: Alignment.center,
                   children: [
                     Image.asset(
-                      "../assets/rules/page_${widget.card!.infoPage}.png",
+                      "rules/page_${widget.card!.infoPage}.png",
                     ),
                     Positioned(
                       bottom: 0,
