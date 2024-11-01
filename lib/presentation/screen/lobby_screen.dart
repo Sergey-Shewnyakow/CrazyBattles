@@ -80,29 +80,24 @@ class MyLobbyState extends State<Lobby> {
                           child: Row(
                             // TODO: account
                             children: [
-                              Stack(
-                                alignment: AlignmentDirectional.center,
-                                children: [
-                                  Container(
-                                    width: 199,
-                                    height: 199,
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: CustomDecorations.smoothMainShadowDark(51),
-                                    child: Container(
-                                      decoration: ShapeDecoration(
-                                        image: const DecorationImage(
-                                          image: AssetImage('images/missing_avatar.jpg')
-                                        ),
-                                        shape: SmoothRectangleBorder(
-                                          borderRadius: SmoothBorderRadius(
-                                            cornerRadius: 35,
-                                            cornerSmoothing: 1,
-                                          ),
-                                        ),
+                              Container(
+                                width: 199,
+                                height: 199,
+                                padding: const EdgeInsets.all(16),
+                                decoration: CustomDecorations.smoothMainShadowDark(51),
+                                child: Container(
+                                  decoration: ShapeDecoration(
+                                    image: const DecorationImage(
+                                      image: AssetImage('images/missing_avatar.jpg')
+                                    ),
+                                    shape: SmoothRectangleBorder(
+                                      borderRadius: SmoothBorderRadius(
+                                        cornerRadius: 35,
+                                        cornerSmoothing: 1,
                                       ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
                               const SizedBox(width: 40),
                               Column(

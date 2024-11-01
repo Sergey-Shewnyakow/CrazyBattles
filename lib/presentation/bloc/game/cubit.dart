@@ -1,9 +1,10 @@
-
 import 'state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 
 import '../../../style/custom_decorations.dart';
 import '../../../style/custom_shadows.dart';
@@ -11,6 +12,53 @@ import '../../../card_models.dart';
 
 class GameCubit extends Cubit<GameState> {
   GameCubit() : super(const GameState());
+
+  Widget buildProfile(bool isOpponent) {
+    return Container(
+      width: 435,
+      height: 283,
+      padding: const EdgeInsets.all(10),
+      decoration: CustomDecorations.smoothLightShadowDark(54),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: CustomDecorations.smoothDark(44),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 160,
+              height: 160,
+              padding: const EdgeInsets.all(11),
+              decoration: CustomDecorations.smoothMainShadowDark(41),
+              child: Container(
+                decoration: ShapeDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(isOpponent ? 'images/missing_avatar1.jpg' : 'images/missing_avatar.jpg')
+                  ),
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 30,
+                      cornerSmoothing: 1
+                    )
+                  )
+                )
+              )
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: Text(
+                isOpponent ? "НИКОПАВЕЛ" : "ВЛАД ЛАХТА",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 35,
+                )
+              )
+            )
+          ]
+        )
+      )
+    );
+  }
 
   //TODO: change according to design
   Widget buildPlayerCards(bool isOpponent) {
@@ -34,6 +82,8 @@ class GameCubit extends Cubit<GameState> {
   }
 
   Widget cardWidget(CardModel card, {required bool isActive}) {
+    double i = 3;//TODO:sector
+    bool isUltimateUsed = true;
     return SizedBox(
       width: isActive ? 345 : 180,
       height: isActive ? 573 : 290,
@@ -65,7 +115,7 @@ class GameCubit extends Cubit<GameState> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SvgPicture.asset("images/HP.svg", color: Colors.white, height: isActive ? 32 : 18), //TODO: AAAAAA Why TF color is needed
+                      SvgPicture.asset("images/HP.svg", height: isActive ? 32 : 18),
                       SizedBox(width: isActive ? 15 : 10),
                       Padding(
                         padding: const EdgeInsets.only(top: 5),
@@ -78,12 +128,25 @@ class GameCubit extends Cubit<GameState> {
                 Container(
                   width: isActive ? 100 : 57,
                   height: isActive ? 85 : 52,
-                  decoration: isActive ? CustomDecorations.smoothMain(25) : CustomDecorations.smoothLight(16)
+                  decoration: isActive ? CustomDecorations.smoothMain(25) : CustomDecorations.smoothLight(16),
+                  child: Padding(
+                    padding: EdgeInsets.all(isActive ? 20 : 13),
+                    child: SvgPicture.string(
+                      '''<svg width="200" height="200" viewBox="0 0 200 200">
+                        <path 
+                          d="M100 100L100 0 ${(i%4 > 2 || (i%4 == 0 && !isUltimateUsed)) ? 'A100 100 0 0 0 100 200' : ''}
+                          A100 100 0 0 0 ${100 + 100 * cos((i + 1) * pi / 2)} ${100 + 100 * sin(-(i + 1) * pi / 2)}
+                          L100 100Z"
+                          fill="#FFFFFF"
+                        />
+                      </svg>'''
+                    )
+                  )
                 )
-              ],
+              ]
             )
           )
-        ],
+        ]
       )
     );
   }
