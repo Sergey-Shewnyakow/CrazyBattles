@@ -4,10 +4,12 @@ class LobbyState {
   final bool isProfileAnimated;
   final CardModel? cardInfoFor;
   final CardModel? movableCard;
+  final bool isMoving;
 
   const LobbyState({
     required this.isProfileAnimated,
     this.cardInfoFor,
-    this.movableCard
+    this.movableCard,
+    this.isMoving = false
   });
 }

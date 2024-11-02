@@ -35,7 +35,7 @@ class CardChooserState extends State<CardChooser> {
   @override
   void didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.lobby.state.movableCard == null) cubit.setSlots();
+    if (!widget.lobby.state.isMoving) cubit.setSlots();
   }
 
   @override

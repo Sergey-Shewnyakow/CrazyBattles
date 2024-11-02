@@ -14,6 +14,7 @@ class LobbyCubit extends Cubit<LobbyState> {
     emit(LobbyState(
       isProfileAnimated: state.isProfileAnimated,
       movableCard: card,
+      isMoving: true
     ));
   }
 
@@ -59,9 +60,17 @@ class LobbyCubit extends Cubit<LobbyState> {
   void _endMove() {
     emit(LobbyState(
       isProfileAnimated: state.isProfileAnimated,
-      movableCard: null,
+      movableCard: state.movableCard,
+      isMoving: false
     ));
+    Future.delayed(const Duration(milliseconds: 50), () {
+      emit(LobbyState(
+        isProfileAnimated: state.isProfileAnimated,
+        movableCard: null
+      ));
+    });
   }
+
 
   void loadInfo(CardModel? card) {
     if (card != null) {
@@ -82,7 +91,8 @@ class LobbyCubit extends Cubit<LobbyState> {
     WidgetsBinding.instance.addPostFrameCallback((_) => emit(LobbyState(
       isProfileAnimated: value,
       cardInfoFor: state.cardInfoFor,
-      movableCard: state.movableCard
+      movableCard: state.movableCard,
+      isMoving: state.isMoving
     )));
   }
 

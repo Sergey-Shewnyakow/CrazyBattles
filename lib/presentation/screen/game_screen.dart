@@ -2,6 +2,7 @@ import '../bloc/game/cubit.dart';
 import '../bloc/game/state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'dart:math';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart'; // flutter visual lib
 
@@ -17,6 +18,12 @@ class GameSession extends StatefulWidget {
 
 class GameSessionState extends State<GameSession> {
   final GameCubit cubit = GameCubit();
+
+  @override
+  void initState() {
+    cubit.startTimer();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +56,14 @@ class GameSessionState extends State<GameSession> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SvgPicture.asset('images/icoClock.svg'),
-                        const SizedBox(width: 20),
+                        const SizedBox(width: 10),
                         Padding(
                           padding: const EdgeInsets.only(top: 7),
                           child: Text(
-                            "1:00",
+                            state.timerValue,
                             style: TextStyle(
                               color: CustomColors.greyLight,
-                              fontSize: 60
+                              fontSize: 55
                             )
                           )
                         )
@@ -114,7 +121,12 @@ class GameSessionState extends State<GameSession> {
               top: 58,
               child: cubit.buildProfile(true)
             ),
-            //Карты второго игрока
+            Positioned(
+              top: 400,
+              left: 0,
+              right: 0,
+              child: cubit.buildPlayerCardsSlots(true),
+            ),
             Positioned(
               top: 400,
               left: 0,
@@ -126,7 +138,13 @@ class GameSessionState extends State<GameSession> {
             //  const Center(
             //    child: Text("Выберите активного персонажа", style: TextStyle(fontSize: 30, color: Colors.blue)),
             //  ),
-            // Карты первого игрока
+            Positioned(
+              bottom: 400,
+              left: 0,
+              right: 0,
+              child: cubit.buildPlayerCardsSlots(false),
+            ),
+            cubit.cardSwitcher(),
             Positioned(
               bottom: 400,
               left: 0,
@@ -137,6 +155,83 @@ class GameSessionState extends State<GameSession> {
               left: 90,
               top: 1580,
               child: cubit.buildProfile(false)
+            ),
+            Positioned(
+              left: 583,
+              top: 1580,
+              child: Container(
+                width: 230,
+                height: 135,
+                decoration: CustomDecorations.smoothMainShadowDark(32),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      'images/lightning.svg',
+                      height: 57,
+                    ),
+                    const SizedBox(width: 10),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Text(
+                        "${state.player2.energy}",
+                        style: const TextStyle(
+                          fontSize: 55,
+                          color: Colors.white
+                        )
+                      )
+                    )
+                  ]
+                )
+              )
+            ),
+            Positioned(
+              left: 825,
+              top: 1580,
+              child: Container(
+                alignment: AlignmentDirectional.center,
+                padding: const EdgeInsets.only(right: 13),
+                width: 165,
+                height: 135,
+                decoration: CustomDecorations.smoothMainShadowDark(32),
+                child: Transform.rotate(
+                  angle: -pi/2,
+                  child: const Text(
+                    "*",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: "monospace",
+                      fontSize: 140,
+                      fontWeight: FontWeight.w900,
+                    )
+                  )
+                )
+              )
+            ),
+            Positioned(
+              left: 583,
+              top: 1734,
+              child: MouseRegion(
+                cursor: state.myTurn ? SystemMouseCursors.click : SystemMouseCursors.basic,
+                child: GestureDetector(
+                  onTap: () => {if (state.myTurn) cubit.changeTurn()},
+                  child: Container(
+                    width: 407,
+                    height: 127,
+                    decoration: CustomDecorations.smoothLightShadowDark(36),
+                    child: const Center(
+                      child: Text(
+                        "ЗАВЕРШИТЬ\nХОД",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 32,
+                          color: Colors.white
+                        )
+                      )
+                    )
+                  )
+                )
+              )
             )
           ],
         );

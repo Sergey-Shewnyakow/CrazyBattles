@@ -13,8 +13,6 @@ class CustomColors {
     const Color.fromARGB(255, 104, 104, 104);
   static get inactiveText =>
     const Color.fromARGB(255, 139, 139, 139); //text on inactive start button
-  static get dottedBorderLine =>
-    const Color.fromARGB(255, 139, 139, 139); //color of border of card socket
   static get mainBright =>
     const Color.fromARGB(255, 134, 0, 255); //dominant color
 

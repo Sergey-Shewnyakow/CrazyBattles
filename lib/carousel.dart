@@ -17,7 +17,7 @@ class CardCarousel extends StatefulWidget {
   });
 
   @override
-  CardCarouselState createState() => CardCarouselState();//TODO: check if it makes any sense to make it BLoC
+  CardCarouselState createState() => CardCarouselState();
 }
 
 class CardCarouselState extends State<CardCarousel> {
