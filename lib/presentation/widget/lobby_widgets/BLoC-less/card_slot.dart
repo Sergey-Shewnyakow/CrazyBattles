@@ -2,7 +2,7 @@ import 'dart:async';
 import '../../../../style/custom_shadows.dart';
 import 'package:flutter/material.dart'; // flutter visual lib
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../card_models.dart'; // models of cards, game and players, cards data
+import '../../../../game_models/card_models.dart'; // models of cards, game and players, cards data
 import '../../../../style/custom_colors.dart';//custom colors
 
 class Slot extends StatefulWidget {

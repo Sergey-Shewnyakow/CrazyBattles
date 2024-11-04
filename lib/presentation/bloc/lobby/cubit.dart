@@ -5,7 +5,7 @@ import 'package:flutter/material.dart'; // flutter visual lib
 import 'package:flutter_animate/flutter_animate.dart'; // animations lib
 
 import '../../../style/custom_decorations.dart';
-import '../../../card_models.dart'; // models of cards, game and players, cards data
+import '../../../game_models/card_models.dart'; // models of cards, game and players, cards data
 
 class LobbyCubit extends Cubit<LobbyState> {
   LobbyCubit() : super(const LobbyState(isProfileAnimated: true));

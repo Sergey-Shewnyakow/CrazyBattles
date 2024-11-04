@@ -8,8 +8,8 @@ import '../../widget/lobby_widgets/card_chooser.dart';
 import '../../../style/custom_decorations.dart';
 import '../../widget/lobby_widgets/BLoC-less/card_slot.dart'; //slot for card in menu
 import '../../widget/lobby_widgets/BLoC-less/expandable_panel.dart'; //panels that become huge on click
-import '../../../carousel.dart'; //carousel for card choose implementation
-import '../../../card_models.dart'; // models of cards, game and players, cards data
+import '../../widget/lobby_widgets/BLoC-less/carousel.dart'; //carousel for card choose implementation
+import '../../../game_models/card_models.dart'; // models of cards, game and players, cards data
 
 class ChooserCubit extends Cubit<ChooserState> {
   ChooserCubit(CardChooser widget) : super(ChooserState(

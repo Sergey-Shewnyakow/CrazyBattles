@@ -11,7 +11,7 @@ import '../../../style/custom_colors.dart';
 import '../../../style/custom_shadows.dart';
 import '../../../style/custom_decorations.dart';
 import 'BLoC-less/expandable_panel.dart'; //panels that become huge on click
-import '../../../card_models.dart'; // models of cards, game and players, cards data
+import '../../../game_models/card_models.dart'; // models of cards, game and players, cards data
 
 class CardChooser extends StatefulWidget {
   final LobbyCubit lobby;

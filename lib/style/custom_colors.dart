@@ -14,7 +14,9 @@ class CustomColors {
   static get inactiveText =>
     const Color.fromARGB(255, 139, 139, 139); //text on inactive start button
   static get mainBright =>
-    const Color.fromARGB(255, 134, 0, 255); //dominant color
+    const Color.fromRGBO(134, 0, 255, 1); //dominant color
+  static get contrastBright =>
+    const Color.fromARGB(255, 121, 255, 0); //color contrasting to dominant
 
   //SHADOWS:
   static get darkShadowMain =>

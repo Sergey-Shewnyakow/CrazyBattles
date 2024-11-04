@@ -1,19 +1,18 @@
+
 import 'state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'dart:math';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cross_fade/cross_fade.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import '../../../style/custom_decorations.dart';
-import '../../../style/custom_shadows.dart';
-import '../../../style/custom_colors.dart';
-import '../../../card_models.dart';
-import 'game_model.dart';
+import '/style/custom_decorations.dart';
+import '/style/custom_shadows.dart';
+import '/style/custom_colors.dart';
+import '/game_models/card_models.dart';
+import '/game_models/player_model.dart';
+import '../../widget/game_widgets/BLoC-less/card_widget.dart';
 
 class GameCubit extends Cubit<GameState> {
   GameCubit() : super(GameState(
@@ -37,7 +36,7 @@ class GameCubit extends Cubit<GameState> {
         selectedCharacterCards[2]
       ], isMy: true)
     ),
-    time: 60
+    someoneSkipped: false
   ));
   static const int cardChangeDuration = 400;
 
@@ -48,7 +47,8 @@ class GameCubit extends Cubit<GameState> {
         emit(GameState(
           player1: state.player1,
           player2: state.player2,
-          myTurn: !state.myTurn,
+          myTurn: state.someoneSkipped ? state.myTurn : !state.myTurn,
+          someoneSkipped: state.someoneSkipped,
           isChangingActive: state.isChangingActive,
           timerValue: '1:00'
         ));
@@ -58,6 +58,7 @@ class GameCubit extends Cubit<GameState> {
         player1: state.player1,
         player2: state.player2,
         myTurn: state.myTurn,
+        someoneSkipped: state.someoneSkipped,
         isChangingActive: state.isChangingActive,
         timerValue: '${time~/60}:${time % 60 < 10 ? "0" : ""}${time % 60}',
         time: time
@@ -71,7 +72,7 @@ class GameCubit extends Cubit<GameState> {
       width: 435,
       height: 283,
       padding: const EdgeInsets.all(10),
-      decoration: CustomDecorations.smoothLightShadowDark(54),
+      decoration: CustomDecorations.smoothColorableShadowDark(54, isOpponent != state.myTurn ? CustomColors.contrastBright : CustomColors.greyLight),
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: CustomDecorations.smoothDark(44),
@@ -116,161 +117,51 @@ class GameCubit extends Cubit<GameState> {
     );
   }
 
-  Widget buildPlayerCardsSlots(bool isOpponent) {
+  Widget cardsOrSlotsRow(bool isOpponent, List<Widget> cards) { // layout for cards
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: isOpponent ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-      children: isOpponent ? [
-        cardWidget(null),
-        const SizedBox(width: 40),
-        cardWidget(null),
-        const SizedBox(width: 58),
-        cardWidget(null, isActive: true)
-      ] : [
-        cardWidget(null, isActive: true),
-        const SizedBox(width: 58),
-        cardWidget(null),
-        const SizedBox(width: 40),
-        cardWidget(null)
+      children: [
+        cards[0],
+        SizedBox(width: isOpponent ? 40 : 58),
+        cards[1],
+        SizedBox(width: isOpponent ? 58 : 40),
+        cards[2]
       ]
     );
   }
 
+  Widget buildPlayerCardsSlots(bool isOpponent) {
+    return cardsOrSlotsRow(isOpponent, [
+      CardWidget(isActive: !isOpponent),
+      const CardWidget(),
+      CardWidget(isActive: isOpponent)
+    ]);
+  }
+
   Widget buildPlayerCards(bool isOpponent) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: isOpponent ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-      children: isOpponent ? [
-        cardWidget(state.player1.cards[2]),
-        const SizedBox(width: 40),
-        cardWidget(state.player1.cards[1]),
-        const SizedBox(width: 58),
-        cardWidget(state.player1.cards[0], isActive: true)
+    return cardsOrSlotsRow(isOpponent, isOpponent ?
+      [
+        CardWidget(card: state.player1.cards[2], isVisible: state.isChangingActive == 0 || state.myTurn),
+        CardWidget(card: state.player1.cards[1], isVisible: state.isChangingActive != 1 || state.myTurn),
+        CardWidget(card: state.player1.cards[0], isActive: true, isVisible: state.isChangingActive != 2 || state.myTurn)
       ] : [
         clickableCardWidget(state.player2.cards[0], isActive: true),
-        const SizedBox(width: 58),
         clickableCardWidget(state.player2.cards[1]),
-        const SizedBox(width: 40),
         clickableCardWidget(state.player2.cards[2])
       ]
     );
   }
 
   Widget clickableCardWidget(CharacterCardGameModel card, {bool isActive = false}) {
-    if (!state.myTurn) return cardWidget(card, isActive: isActive);
+    CardWidget cardWidget = CardWidget(card: card, isActive: isActive, isVisible: state.isChangingActive == 0 || state.isChangingActive == 3-card.number  || !state.myTurn);
+    if (!state.myTurn || state.isChangingActive != 0) return cardWidget;
     return MouseRegion(
-      cursor: state.isChangingActive == 0 ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: state.isChangingActive != 0 ? () => {}
-          : card.isActive ? () => {} : () => changeActiveCardAnimate(card.number),
-        child: cardWidget(card, isActive: isActive)
-      )
-    );
-  }
-
-  Widget cardWidget(CharacterCardGameModel? card, {bool isActive = false}) {
-    if (card == null) {
-      return SizedBox(
-        width: isActive ? 345 : 180,
-        height: isActive ? 573 : 290,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(
-              top: 0,
-              child: SizedBox(
-                width: isActive ? 345 : 180,
-                height: isActive ? 538 : 283,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: CustomColors.greyDark,
-                    border: Border.all(
-                      color: CustomColors.greyLight,
-                      width: 5
-                    )
-                  )
-                )
-              )
-            )
-          ]
-        )
-      );
-    }
-    double ultimateProgress = card.ultimateProgress;//TODO:sector
-    bool isUltimateUsed = true;//TODO: implement. false when the sector is full, true when it's empty
-    return SizedBox(
-      width: isActive ? 345 : 180,
-      height: isActive ? 573 : 290,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            top: 0,
-            width: isActive ? 345 : 180,
-            height: isActive ? 538 : 283,
-            child: Container(
-              decoration: (state.isChangingActive == 0 || state.isChangingActive == 3-card.number  || (state.myTurn != card.isMy)) ? 
-                BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(card.asset),
-                  ),
-                  boxShadow: CustomBoxShadows.shadowOnDark
-                )
-                : const BoxDecoration()
-            )
-          ),
-          Positioned(
-            bottom: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: isActive ? 150 : 90,
-                  height: isActive ? 80 : 49,
-                  decoration: isActive ? CustomDecorations.smoothMain(20) : CustomDecorations.smoothLight(13),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset("images/HP.svg", height: isActive ? 32 : 18),
-                      SizedBox(width: isActive ? 15 : 10),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: CrossFade(
-                          duration: const Duration(milliseconds: cardChangeDuration),
-                          value: card.hp,
-                          builder: (context, i) => Text("$i", style: TextStyle(fontSize: isActive ? 32 : 18, color: Colors.white))
-                        )
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(width: isActive ? 30 : 15),
-                Container(
-                  width: isActive ? 100 : 57,
-                  height: isActive ? 85 : 52,
-                  decoration: isActive ? CustomDecorations.smoothMain(25) : CustomDecorations.smoothLight(16),
-                  child: Padding(
-                    padding: EdgeInsets.all(isActive ? 20 : 13),
-                    child: CrossFade(
-                      duration: const Duration(milliseconds: cardChangeDuration),
-                      value: ultimateProgress,
-                      builder: (context, i) => SvgPicture.string(
-                        '''<svg width="200" height="200" viewBox="0 0 200 200">
-                          <path 
-                            d="M100 100L100 0 ${(i%4 > 2 || (i%4 == 0 && !isUltimateUsed)) ? 'A100 100 0 0 0 100 200' : ''}
-                            A100 100 0 0 0 ${100 + 100 * cos((i + 1) * pi / 2)} ${100 + 100 * sin(-(i + 1) * pi / 2)}
-                            L100 100Z"
-                            fill="#FFFFFF"
-                          />
-                        </svg>'''
-                      )
-                    )
-                  )
-                )
-              ]
-            )
-          )
-        ]
+        onTap: card.isActive ? () => {}
+          : () => changeActiveCardAnimate(card.number),
+        child: cardWidget
       )
     );
   }
@@ -329,6 +220,7 @@ class GameCubit extends Cubit<GameState> {
       player1: state.player1,
       player2: state.player2,
       myTurn: state.myTurn,
+      someoneSkipped: state.someoneSkipped,
       isChangingActive: cardNum,
       timerValue: state.timerValue,
       time: state.time
@@ -339,17 +231,33 @@ class GameCubit extends Cubit<GameState> {
     emit(GameState(
       player1: state.player1,
       player2: state.player2,
-      myTurn: !state.myTurn,
+      myTurn: state.someoneSkipped ? state.myTurn : !state.myTurn,
+      someoneSkipped: state.someoneSkipped,
       isChangingActive: 0,
       timerValue: state.timerValue
     ));
   }
 
   void changeTurn() {
+    if (!state.someoneSkipped) {
+      emit(GameState(
+        player1: state.player1,
+        player2: state.player2,
+        myTurn: !state.myTurn,
+        someoneSkipped: true,
+        timerValue: state.timerValue
+      ));
+    } else {nextRound();}
+  }
+
+  void nextRound() {
+    state.player1.resetEnergy();
+    state.player2.resetEnergy();
     emit(GameState(
       player1: state.player1,
       player2: state.player2,
       myTurn: !state.myTurn,
+      someoneSkipped: false,
       timerValue: state.timerValue
     ));
   }

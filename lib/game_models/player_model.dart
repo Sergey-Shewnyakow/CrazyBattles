@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../card_models.dart';
+import 'card_models.dart';
 
 // Модель игрока
 class PlayerModel {

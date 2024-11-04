@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'card_models.dart'; // models of cards, game and players, cards data
+import '../../../../game_models/card_models.dart'; // models of cards, game and players, cards data
 
 class CardCarousel extends StatefulWidget {
   final List<String> imageAssets; // Список адресов изображений

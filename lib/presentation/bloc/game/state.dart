@@ -1,9 +1,10 @@
-import 'game_model.dart';
+import '../../../game_models/player_model.dart';
 
 class GameState {
   final PlayerModel player1;
   final PlayerModel player2;
   final bool myTurn;
+  final bool someoneSkipped;
   final int isChangingActive;
   final String timerValue;
   final int time;
@@ -15,12 +16,6 @@ class GameState {
     this.myTurn = true,
     this.isChangingActive = 0,
     this.timerValue = "1:00",
+    required this.someoneSkipped,
   });
 }
-
-  //void nextTurn() => player1Turn = !player1Turn;
-
-  //void nextRound() {
-  //  player1.resetEnergy();
-  //  player2.resetEnergy();
-  //}
