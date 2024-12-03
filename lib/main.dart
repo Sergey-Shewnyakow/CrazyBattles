@@ -7,6 +7,7 @@ import 'style/custom_colors.dart';
 // Виджет игры
 class CardGameApp extends StatefulWidget {
   static Function changeWindow = () => {};
+  static Function toMenu = () => {};
   const CardGameApp({super.key});
 
   @override
@@ -17,45 +18,46 @@ class CardGameAppState extends State<CardGameApp> {
   int inLobby = 0; // 0 = menu 1 = opponent search 2 = game screen
   int inLobbyPrev = 0;
 
-  void _nextWindow() => setState(() {inLobby = (inLobby+1)%3;});
+  void _nextWindow() => setState(() {
+        inLobby = (inLobby + 1) % 3;
+      });
+  void _toMenu() => setState(() {
+        inLobby = 0;
+      });
 
   @override
   void initState() {
     CardGameApp.changeWindow = _nextWindow;
+    CardGameApp.toMenu = _toMenu;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: 'syncopate'),
-      home: inLobby != inLobbyPrev ? animatedScreens() : Scaffold(
-        backgroundColor: CustomColors.greyDark,
-        body: Animate(
-          effects: const [
-            FadeEffect(
-              duration: Duration(milliseconds: 1000),
-              curve: Curves.easeOutCubic
-            )
-          ],
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: SizedBox(
-                width: 1080,
-                height: 1920,
-                child: inLobby == 0
-                  ? const Lobby()
-                  : inLobby == 1
-                    ? const OpponentSearch()
-                    : const GameSession()
-              )
-            )
-          )
-        )
-      )
-    );
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(fontFamily: 'syncopate'),
+        home: inLobby != inLobbyPrev
+            ? animatedScreens()
+            : Scaffold(
+                backgroundColor: CustomColors.greyDark,
+                body: Animate(
+                    effects: const [
+                      FadeEffect(
+                          duration: Duration(milliseconds: 1000),
+                          curve: Curves.easeOutCubic)
+                    ],
+                    child: Center(
+                        child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: SizedBox(
+                                width: 1080,
+                                height: 1920,
+                                child: inLobby == 0
+                                    ? const Lobby()
+                                    : inLobby == 1
+                                        ? const OpponentSearch()
+                                        : const GameSession()))))));
   }
 
   Widget animatedScreens() {
