@@ -50,7 +50,8 @@ class GameCubit extends Cubit<GameState> {
           myTurn: state.someoneSkipped ? state.myTurn : !state.myTurn,
           someoneSkipped: state.someoneSkipped,
           isChangingActive: state.isChangingActive,
-          timerValue: '1:00'
+          timerValue: '1:00',
+          isAttacking: state.isAttacking
         ));
         return;
       }
@@ -61,7 +62,8 @@ class GameCubit extends Cubit<GameState> {
         someoneSkipped: state.someoneSkipped,
         isChangingActive: state.isChangingActive,
         timerValue: '${time~/60}:${time % 60 < 10 ? "0" : ""}${time % 60}',
-        time: time
+        time: time,
+        isAttacking: state.isAttacking
       ));
     });
   }
@@ -159,8 +161,7 @@ class GameCubit extends Cubit<GameState> {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: card.isActive ? () => {}
-          : () => changeActiveCardAnimate(card.number),
+        onTap: isActive ? () => AttackReady(true) : () => changeActiveCardAnimate(card.number),
         child: cardWidget
       )
     );
@@ -258,7 +259,40 @@ class GameCubit extends Cubit<GameState> {
       player2: state.player2,
       myTurn: !state.myTurn,
       someoneSkipped: false,
+      timerValue: state.timerValue,
+    ));
+  }
+
+  void AttackReady(bool value) {
+    emit(GameState(
+      player1: state.player1,
+      player2: state.player2,
+      myTurn: state.myTurn,
+      someoneSkipped: state.someoneSkipped,
+      isChangingActive: state.isChangingActive,
+      timerValue: state.timerValue,
+      time: state.time,
+      isAttacking: value
+    ));
+  }
+
+  void AttackDoneLetsChangeTurn() {
+    emit(GameState(
+      player1: state.player1,
+      player2: state.player2,
+      myTurn: !state.myTurn,
+      someoneSkipped: state.someoneSkipped,
       timerValue: state.timerValue
     ));
+  }
+
+//TODO: attack button, ult button
+  void attack() {
+    //here
+    AttackDoneLetsChangeTurn();
+  }
+  void ultimate() {
+    //and here
+    AttackDoneLetsChangeTurn();
   }
 }
