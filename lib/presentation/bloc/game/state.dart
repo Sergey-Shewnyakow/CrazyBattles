@@ -10,14 +10,13 @@ class GameState {
   final int time;
   final bool isAttacking;
 
-  GameState({
-    required this.player1,
-    required this.player2,
-    this.time = 60,
-    this.myTurn = true,
-    this.isChangingActive = 0,
-    this.timerValue = "1:00",
-    required this.someoneSkipped,
-    this.isAttacking = false
-  });
+  GameState(
+      {required this.player1,
+      required this.player2,
+      this.time = 3,
+      this.myTurn = true,
+      this.isChangingActive = 0,
+      this.timerValue = "0:03",
+      required this.someoneSkipped,
+      this.isAttacking = false});
 }

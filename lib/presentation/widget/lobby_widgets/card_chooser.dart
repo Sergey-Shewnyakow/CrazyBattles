@@ -13,6 +13,43 @@ import '../../../style/custom_decorations.dart';
 import 'BLoC-less/expandable_panel.dart'; //panels that become huge on click
 import '../../../game_models/card_models.dart'; // models of cards, game and players, cards data
 
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // Для JSON
+
+Future<void> submitSelectedCards(
+  List<CardModel> selectedCharacterCards,
+  List<CardModel> selectedAssistCards,
+) async {
+  const url = 'http://127.0.0.1:5000/submit_cards';
+  try {
+    print("Отправка запроса на $url...");
+    print("Выбранные карты:");
+    print(
+        "Character: ${selectedCharacterCards.map((card) => card.name).toList()}");
+    print("Assist: ${selectedAssistCards.map((card) => card.name).toList()}");
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'selected_character_cards':
+            selectedCharacterCards.map((card) => card.name).toList(),
+        'selected_assist_cards':
+            selectedAssistCards.map((card) => card.name).toList(),
+      }),
+    );
+
+    print("Ответ от сервера: ${response.statusCode}");
+    if (response.statusCode == 200) {
+      print("Карты успешно отправлены: ${response.body}");
+    } else {
+      print("Ошибка: ${response.statusCode} - ${response.body}");
+    }
+  } catch (e) {
+    print("Ошибка при отправке данных: $e");
+  }
+}
+
 class CardChooser extends StatefulWidget {
   final LobbyCubit lobby;
   final Function(CardModel) loadInfo;
@@ -73,7 +110,8 @@ class CardChooserState extends State<CardChooser> {
                   children: [
                     for (int i = 0; i < state.slots.length; i++) ...[
                       state.slots[i],
-                      if (i < (state.slots.length - 1)) const SizedBox(width: 26),
+                      if (i < (state.slots.length - 1))
+                        const SizedBox(width: 26),
                     ]
                   ],
                 ),
@@ -84,7 +122,8 @@ class CardChooserState extends State<CardChooser> {
                 height: 130.81,
                 width: 417.44,
                 child: Container(
-                  decoration: BoxDecoration(boxShadow: CustomBoxShadows.shadowOnDark),
+                  decoration:
+                      BoxDecoration(boxShadow: CustomBoxShadows.shadowOnDark),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: CustomColors.mainBright,
@@ -99,14 +138,20 @@ class CardChooserState extends State<CardChooser> {
                       padding: EdgeInsets.zero,
                     ),
                     onPressed: selectedCharacterCards.length == 3
-                        ? () => CardGameApp.changeWindow()
+                        ? () {
+                            submitSelectedCards(
+                              selectedCharacterCards,
+                              selectedAssistCards,
+                            ); // Передача аргументов
+                            CardGameApp.changeWindow();
+                          }
                         : null,
                     child: Text(
                       "ИГРАТЬ",
                       style: TextStyle(
                         color: selectedCharacterCards.length == 3
-                          ? Colors.white
-                          : CustomColors.inactiveText,
+                            ? Colors.white
+                            : CustomColors.inactiveText,
                         fontSize: 57,
                       ),
                     ),
@@ -117,7 +162,8 @@ class CardChooserState extends State<CardChooser> {
           ),
           unload: cubit.backToClassChoose,
           onActive: widget.onPanelActive,
-          background: Container(decoration: CustomDecorations.smoothLightShadowDark(35)),
+          background: Container(
+              decoration: CustomDecorations.smoothLightShadowDark(35)),
           title: const Text(
             "ИЗМЕНИТЬ\nСОСТАВ",
             style: TextStyle(
@@ -138,22 +184,22 @@ class CardChooserState extends State<CardChooser> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          cubit.clickablePanelOfCardType(1,'Support'),
+                          cubit.clickablePanelOfCardType(1, 'Support'),
                           const SizedBox(width: 44),
-                          cubit.clickablePanelOfCardType(2,'Damagger'),
+                          cubit.clickablePanelOfCardType(2, 'Damagger'),
                         ],
                       ),
                       const SizedBox(height: 44),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          cubit.clickablePanelOfCardType(3,'Healer'),
+                          cubit.clickablePanelOfCardType(3, 'Healer'),
                           const SizedBox(width: 44),
-                          cubit.clickablePanelOfCardType(4,'Shielder'),
+                          cubit.clickablePanelOfCardType(4, 'Shielder'),
                         ],
                       ),
                       const SizedBox(height: 44),
-                      cubit.clickablePanelOfCardType(5,""),//assist
+                      cubit.clickablePanelOfCardType(5, ""), //assist
                     ],
                   ),
                 ),

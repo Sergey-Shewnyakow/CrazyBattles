@@ -28,7 +28,9 @@ class PlayerModel {
       cards[number == 1 ? 0 : 1],
       cards[number == 2 ? 0 : 2]
     ];
-    for (int i = 0; i < 3; i++) {cards[i].number = i;}
+    for (int i = 0; i < 3; i++) {
+      cards[i].number = i;
+    }
     cards[0].isActive = true;
     cards[number].isActive = false;
   }
@@ -41,32 +43,31 @@ class CharacterCardGameModel extends CardModel {
   bool isMy;
   int number;
 
-  CharacterCardGameModel({
-    required super.name,
-    required super.asset,
-    required super.cardClass,
-    required super.infoPage,
-    required this.isMy,
-    required this.number,
-    this.hp = 10,
-    this.ultimateProgress = 0,
-    this.isActive = false
-  });
+  CharacterCardGameModel(
+      {required super.name,
+      required super.asset,
+      required super.cardClass,
+      required super.infoPage,
+      required this.isMy,
+      required this.number,
+      this.hp = 10,
+      this.ultimateProgress = 0,
+      this.isActive = false});
 
-  static List<CharacterCardGameModel> fromCardList(List<CardModel> cards, {required bool isMy}) {
+  static List<CharacterCardGameModel> fromCardList(List<CardModel> cards,
+      {required bool isMy}) {
     List<CharacterCardGameModel> list = [];
     for (int i = 0; i < 3; i++) {
       CardModel card = cards[i];
       CharacterCardGameModel cardInGame = CharacterCardGameModel(
-        name: card.name,
-        asset: card.asset,
-        cardClass: card.cardClass,
-        infoPage: card.infoPage,
-        isMy: isMy,
-        number: i,
-        hp: 10-i,
-        ultimateProgress: 3.0-i
-      );
+          name: card.name,
+          asset: card.asset,
+          cardClass: card.cardClass,
+          infoPage: card.infoPage,
+          isMy: isMy,
+          number: i,
+          hp: 10,
+          ultimateProgress: 0.0);
       if (i == 0) cardInGame.isActive = true;
       list.add(cardInGame);
     }
