@@ -9,6 +9,7 @@ class GameState {
   final String timerValue;
   final int time;
   final bool isAttacking;
+  final int gameEndState;
 
   GameState(
       {required this.player1,
@@ -18,5 +19,6 @@ class GameState {
       this.isChangingActive = 0,
       this.timerValue = "0:03",
       required this.someoneSkipped,
-      this.isAttacking = false});
+      this.isAttacking = false,
+      required this.gameEndState});
 }

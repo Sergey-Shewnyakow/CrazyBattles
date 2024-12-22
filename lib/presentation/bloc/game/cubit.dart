@@ -1,6 +1,7 @@
 import 'state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'dart:ui' as ui;
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:figma_squircle/figma_squircle.dart';
@@ -12,7 +13,6 @@ import '/style/custom_colors.dart';
 import '/game_models/card_models.dart';
 import '/game_models/player_model.dart';
 import '../../widget/game_widgets/BLoC-less/card_widget.dart';
-import '../../widget/game_widgets/BLoC-less/game_end.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -48,6 +48,8 @@ Future<void> savePlayerData(
 final random = Random();
 
 class GameCubit extends Cubit<GameState> {
+  bool isAttackPreparingStarted = false;
+
   GameCubit()
       : super(GameState(
             player1: PlayerModel(
@@ -68,7 +70,8 @@ class GameCubit extends Cubit<GameState> {
                   selectedCharacterCards[1],
                   selectedCharacterCards[2]
                 ], isMy: true)),
-            someoneSkipped: false)) {
+            someoneSkipped: false,
+            gameEndState: -1)) {
     savePlayerData(state.player1.name, state.player1.cards);
   }
 
@@ -77,6 +80,11 @@ class GameCubit extends Cubit<GameState> {
   void startTimer() {
     Timer.periodic(const Duration(seconds: 1), (timer) {
       int time = state.time - 1;
+      print(state.isChangingActive);
+      if (state.gameEndState >= 0) {
+        timer.cancel();
+        return;
+      }
       if (time == 0) {
         emit(GameState(
             player1: state.player1,
@@ -85,7 +93,8 @@ class GameCubit extends Cubit<GameState> {
             someoneSkipped: state.someoneSkipped,
             isChangingActive: state.isChangingActive,
             timerValue: '1:00',
-            isAttacking: state.isAttacking));
+            isAttacking: state.isAttacking  && !state.myTurn,
+            gameEndState: state.gameEndState));
         return;
       }
       emit(GameState(
@@ -96,7 +105,8 @@ class GameCubit extends Cubit<GameState> {
           isChangingActive: state.isChangingActive,
           timerValue: '${time ~/ 60}:${time % 60 < 10 ? "0" : ""}${time % 60}',
           time: time,
-          isAttacking: state.isAttacking));
+          isAttacking: state.isAttacking,
+          gameEndState: state.gameEndState));
     });
   }
 
@@ -202,8 +212,8 @@ class GameCubit extends Cubit<GameState> {
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
             onTap: isActive
-                ? () => AttackReady(true)
-                : () => changeActiveCardAnimate(card.number),
+                ? () => attackReady(true)
+                : () => changeActiveCard(card.number),
             child: cardWidget));
   }
 
@@ -242,18 +252,98 @@ class GameCubit extends Cubit<GameState> {
                             decoration: BoxDecoration(
                                 image: DecorationImage(
                                   image:
-                                      AssetImage(state.player2.cards[0].asset),
+                                      AssetImage(state.player2.activeCard.asset),
                                 ),
                                 boxShadow: CustomBoxShadows.shadowOnDark)))
                   ]))
         ]);
   }
 
-  Future<void> changeActiveCardAnimate(int cardNum) async {
-    if (state.player2.energy < 1) return;
-    state.player2.energy--;
-    state.player2.setActiveCard(number: cardNum);
+  Widget attacker() {
+    if (!state.isAttacking) return const SizedBox.shrink();
+    return Stack(
+      children: [
+        GestureDetector(
+          onTapDown: (_) => isAttackPreparingStarted = true,
+          onTap: () => {
+            isAttackPreparingStarted = false,
+            attackReady(false)
+          },
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+            child: Container(
+              color: Colors.black.withOpacity(0.5),
+            )
+          )
+        ),
+        Center(
+          child: SizedBox(
+            width: 810,
+            height: 150,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _button("ATTACK", CustomColors.greyLight, attack),
+                const SizedBox(width: 70),
+                state.player2.activeCard.ultimateProgress == 4
+                  ? _button("ULTIMATE", CustomColors.mainBright, ultimate)
+                  : _inactiveButton()
+              ]
+            )
+          )
+        )
+      ]
+    );
+  }
 
+  Widget _button(String txt, Color color, Function func) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTapDown: (_) => isAttackPreparingStarted = true,
+        onTap: () => {
+          isAttackPreparingStarted = false,
+          func()
+        },
+        child: Container(
+          alignment: Alignment.center,
+          height: 150,
+          width: 370,
+          decoration: CustomDecorations.smoothColorable(51, color),
+          child: Text(
+            txt,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 50
+            )
+          )
+        )
+      )
+    );
+  }
+
+  Widget _inactiveButton() {
+    return Container(
+      alignment: Alignment.center,
+      height: 150,
+      width: 370,
+      decoration: CustomDecorations.smoothColorable(51, CustomColors.greyDark),
+      child: const Text(
+        "ULTIMATE",
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 50
+        )
+      )
+    );
+  }
+
+  void changeActiveCard(int cardNum) {
+    changeActiveCardAnimate(cardNum);
+    changeActiveCardSend(cardNum);
+  }
+
+  Future<void> changeActiveCardSend(int cardNum) async {
     const url =
         'http://127.0.0.1:5000/update_active_card'; // Примерный URL, измените на свой
 
@@ -274,16 +364,22 @@ class GameCubit extends Cubit<GameState> {
     } catch (e) {
       print('Ошибка при отправке данных на сервер: $e');
     }
+  }
+  
+  void changeActiveCardAnimate(int cardNum) {
+    if (state.player2.energy < 1) return;
+    state.player2.energy--;
+    state.player2.setActiveCard(number: cardNum);
 
-    // Обновляем состояние после изменения активной карты
     emit(GameState(
         player1: state.player1,
         player2: state.player2,
         myTurn: state.myTurn,
         someoneSkipped: state.someoneSkipped,
-        isChangingActive: cardNum, // Обновление активной карты в UI
+        isChangingActive: cardNum,
         timerValue: state.timerValue,
-        time: state.time));
+        time: state.time,
+        gameEndState: state.gameEndState));
   }
 
   void changeActiveCardApply() {
@@ -293,7 +389,8 @@ class GameCubit extends Cubit<GameState> {
         myTurn: state.someoneSkipped ? state.myTurn : !state.myTurn,
         someoneSkipped: state.someoneSkipped,
         isChangingActive: 0,
-        timerValue: state.timerValue));
+        timerValue: state.timerValue,
+        gameEndState: state.gameEndState));
   }
 
   void changeTurn() {
@@ -303,7 +400,8 @@ class GameCubit extends Cubit<GameState> {
           player2: state.player2,
           myTurn: !state.myTurn,
           someoneSkipped: true,
-          timerValue: state.timerValue));
+          timerValue: state.timerValue,
+          gameEndState: state.gameEndState));
     } else {
       nextRound();
     }
@@ -318,11 +416,12 @@ class GameCubit extends Cubit<GameState> {
       myTurn: !state.myTurn,
       someoneSkipped: false,
       timerValue: state.timerValue,
+      gameEndState: state.gameEndState
     ));
     sendCardsHealthData();
   }
 
-  void AttackReady(bool value) {
+  void attackReady(bool value) {
     emit(GameState(
         player1: state.player1,
         player2: state.player2,
@@ -331,16 +430,18 @@ class GameCubit extends Cubit<GameState> {
         isChangingActive: state.isChangingActive,
         timerValue: state.timerValue,
         time: state.time,
-        isAttacking: value));
+        isAttacking: value,
+        gameEndState: state.gameEndState));
   }
 
-  void AttackDoneLetsChangeTurn() {
+  void attackDoneLetsChangeTurn() {
     emit(GameState(
         player1: state.player1,
         player2: state.player2,
         myTurn: !state.myTurn,
         someoneSkipped: state.someoneSkipped,
-        timerValue: state.timerValue));
+        timerValue: state.timerValue,
+        gameEndState: state.gameEndState));
   }
 
   void attackPlayer(CharacterCardGameModel attackingCard,
@@ -352,8 +453,7 @@ class GameCubit extends Cubit<GameState> {
       print('${defendingCard.name} уничтожен!');
       changeOpponentActiveCard();
     } else {
-      print(
-          '${defendingCard.name} получил урон! Текущее здоровье: ${defendingCard.hp}');
+      print('${defendingCard.name} получил урон! Текущее здоровье: ${defendingCard.hp}');
     }
 
     attackingCard.ultimateProgress += 1;
@@ -372,6 +472,7 @@ class GameCubit extends Cubit<GameState> {
       timerValue: state.timerValue,
       time: state.time,
       isAttacking: state.isAttacking,
+      gameEndState: state.gameEndState
     ));
   }
 
@@ -388,10 +489,21 @@ class GameCubit extends Cubit<GameState> {
 
     if (opponentCards.every((card) => card.hp <= 0)) {
       print('Все карты противника уничтожены! Вы победили!');
+      emit(GameState(
+        player1: state.player1,
+        player2: state.player2,
+        myTurn: state.myTurn,
+        someoneSkipped: false,
+        timerValue: "-:--",
+        time: 0,
+        isAttacking: false,
+        gameEndState: 1 //Win/ if lose, zero
+      ));
     }
   }
 
   void changeOpponentActiveCard() {
+    if (state.player1.cards.where((card) => card.hp > 0).isEmpty) return;
     CharacterCardGameModel? nextActiveCard = state.player1.cards.firstWhere(
       (card) => card.hp > 0,
     );
@@ -446,20 +558,19 @@ class GameCubit extends Cubit<GameState> {
     }
   }
 
-//TODO: attack button, ult button
   void attack() {
     CharacterCardGameModel attackingCard =
-        state.player2.cards[0]; // карты атакующего
-    if (state.player1.cards[0].hp > 0) {
-      CharacterCardGameModel defendingCard = state.player1.cards[0];
+        state.player2.activeCard; // карты атакующего
+    if (state.player1.activeCard.hp > 0) {
+      CharacterCardGameModel defendingCard = state.player1.activeCard;
       attackPlayer(attackingCard, defendingCard);
     } else if (state.player1.cards[1].hp > 0 &&
-        state.player1.cards[0].hp <= 0) {
+        state.player1.activeCard.hp <= 0) {
       CharacterCardGameModel defendingCard =
           state.player1.cards[1]; // карты защитника
       attackPlayer(attackingCard, defendingCard);
-    } else if (state.player1.cards[0].hp <= 0 &&
-        state.player1.cards[0].hp <= 0) {
+    } else if (state.player1.activeCard.hp <= 0 &&
+        state.player1.activeCard.hp <= 0) {
       CharacterCardGameModel defendingCard =
           state.player1.cards[2]; // карты защитника
       attackPlayer(attackingCard, defendingCard);
@@ -469,12 +580,12 @@ class GameCubit extends Cubit<GameState> {
 
     sendCardsHealthData();
 
-    AttackDoneLetsChangeTurn();
+    attackDoneLetsChangeTurn();
   }
 
   void ultimate() {
     // Получаем активную карту игрока
-    CharacterCardGameModel activeCard = state.player2.cards[0];
+    CharacterCardGameModel activeCard = state.player2.activeCard;
 
     // Проверяем класс активной карты и применяем соответствующий эффект
     switch (activeCard.cardClass) {
@@ -506,7 +617,7 @@ class GameCubit extends Cubit<GameState> {
 
       case "Щитовик":
         // -3 HP активной карте врага
-        CharacterCardGameModel opponentActiveCard = state.player1.cards[0];
+        CharacterCardGameModel opponentActiveCard = state.player1.activeCard;
         opponentActiveCard.hp -= 2;
         opponentActiveCard.hp = opponentActiveCard.hp < 0
             ? 0
@@ -518,6 +629,11 @@ class GameCubit extends Cubit<GameState> {
     }
 
     activeCard.ultimateProgress = 0;
+
+    if (state.player1.activeCard.hp <= 0) {
+      changeOpponentActiveCard();
+    }
+
     // Проверяем состояние здоровья карт противника
     checkOpponentCardsHealth();
 
@@ -525,6 +641,6 @@ class GameCubit extends Cubit<GameState> {
     sendCardsHealthData();
 
     // Завершаем ход
-    AttackDoneLetsChangeTurn();
+    attackDoneLetsChangeTurn();
   }
 }

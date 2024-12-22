@@ -71,8 +71,7 @@ class CardWidgetState extends EmptyCardWidgetState {
   List<Widget> childrenList() {
     CharacterCardGameModel card = widget.card!;
     bool isActive = widget.isActive;
-    double ultimateProgress = card.ultimateProgress;//TODO:sector
-    bool isUltimateUsed = true;//TODO: implement. false when the sector is full, true when it's empty
+    double ultimateProgress = card.ultimateProgress;
     return [
       positionedSlot(),
       Positioned(
@@ -113,7 +112,7 @@ class CardWidgetState extends EmptyCardWidgetState {
                   builder: (context, i) => SvgPicture.string(
                     '''<svg width="200" height="200" viewBox="0 0 200 200">
                       <path 
-                        d="M100 100L100 0 ${(i%4 > 2 || (i%4 == 0 && !isUltimateUsed)) ? 'A100 100 0 0 0 100 200' : ''}
+                        d="M100 100L100 0 ${(i%4 > 2 || (i==4)) ? 'A100 100 0 0 0 100 200' : ''}
                         A100 100 0 0 0 ${100 + 100 * cos((i + 1) * pi / 2)} ${100 + 100 * sin(-(i + 1) * pi / 2)}
                         L100 100Z"
                         fill="#FFFFFF"

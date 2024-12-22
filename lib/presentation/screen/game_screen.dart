@@ -5,7 +5,6 @@ import '../bloc/game/cubit.dart';
 import '../bloc/game/state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'dart:ui' as ui;
 import 'dart:math';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart'; // flutter visual lib
@@ -23,7 +22,6 @@ class GameSession extends StatefulWidget {
 
 class GameSessionState extends State<GameSession> {
   final GameCubit cubit = GameCubit();
-  bool isAttackPreparingStarted = false;
   Widget screenEnd = const SizedBox.shrink();
 
   @override
@@ -38,6 +36,7 @@ class GameSessionState extends State<GameSession> {
     return BlocBuilder<GameCubit, GameState>(
       bloc: cubit,
       builder: (context, state) {
+        checkEndGame(state.gameEndState);
         return Stack(
           children: [
             Center(
@@ -194,85 +193,11 @@ class GameSessionState extends State<GameSession> {
                                     style: TextStyle(
                                         fontSize: 32,
                                         color: Colors.white))))))),
-            if(state.isAttacking)  Stack(
-              children: [
-                GestureDetector(
-                  onTapDown: (_) => isAttackPreparingStarted = true,
-                  onTap: () => {
-                    isAttackPreparingStarted = false,
-                    cubit.AttackReady(false)
-                  },
-                  child: BackdropFilter(
-                    filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                    child: Container(
-                      color: Colors.black.withOpacity(0.5),
-                    )
-                  )
-                ),
-                Center(
-                  child: SizedBox(
-                    width: 810,
-                    height: 150,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _button("ATTACK", CustomColors.greyLight, cubit.attack),
-                        const SizedBox(width: 70),
-                        state.player2.activeCard.ultimateProgress == 4
-                          ? _button("ULTIMATE", CustomColors.mainBright, cubit.ultimate)
-                          : _inactiveButton()
-                      ]
-                    )
-                  )
-                )
-              ]
-            ),
+            cubit.attacker(),
             screenEnd
           ],
         );
       },
-    );
-  }
-
-  Widget _button(String txt, Color color, Function func) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTapDown: (_) => isAttackPreparingStarted = true,
-        onTap: () => {
-          isAttackPreparingStarted = false,
-          func()
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 150,
-          width: 370,
-          decoration: CustomDecorations.smoothColorable(51, color),
-          child: Text(
-            txt,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 50
-            )
-          )
-        )
-      )
-    );
-  }
-
-  Widget _inactiveButton() {
-    return Container(
-      alignment: Alignment.center,
-      height: 150,
-      width: 370,
-      decoration: CustomDecorations.smoothColorable(51, CustomColors.greyDark),
-      child: const Text(
-        "ULTIMATE",
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 50
-        )
-      )
     );
   }
 
@@ -288,11 +213,18 @@ class GameSessionState extends State<GameSession> {
         screenEnd = const EndGameWidget(
           areYouWinningSon: false,
         );
-      } else if (key == 'M') {
+      } if (key == 'M') {
         CardGameApp.toMenu();
       }
     }
 
     return false;
+  }
+
+  void checkEndGame(value) {
+    if (value < 0) return;
+    screenEnd = EndGameWidget(
+      areYouWinningSon: value == 1,
+    );
   }
 }
