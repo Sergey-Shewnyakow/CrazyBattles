@@ -14,10 +14,10 @@ class GameState {
   GameState(
       {required this.player1,
       required this.player2,
-      this.time = 3,
+      this.time = 10,
       this.myTurn = true,
       this.isChangingActive = 0,
-      this.timerValue = "0:03",
+      this.timerValue = "0:10",
       required this.someoneSkipped,
       this.isAttacking = false,
       required this.gameEndState});

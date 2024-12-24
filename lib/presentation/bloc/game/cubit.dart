@@ -575,7 +575,9 @@ class GameCubit extends Cubit<GameState> {
           state.player1.cards[2]; // карты защитника
       attackPlayer(attackingCard, defendingCard);
     }
-
+    
+    applyRandomDamageToAlliedCard();
+    
     checkOpponentCardsHealth();
 
     sendCardsHealthData();
@@ -643,4 +645,26 @@ class GameCubit extends Cubit<GameState> {
     // Завершаем ход
     attackDoneLetsChangeTurn();
   }
+
+  void applyRandomDamageToAlliedCard() {
+  // Выбираем случайную карту из списка союзных карт
+  var card = state.player2.cards
+      .where((card) => card.hp > 0) // Оставляем только карты с HP > 0
+      .toList(); // Преобразуем результат в список
+
+  if (card.isNotEmpty) {
+    var randomCard = card[random.nextInt(card.length)]; // Выбираем случайную карту из списка
+    int damage = random.nextInt(3) + 1; // Случайное значение от 1 до 3
+    randomCard.hp -= damage;
+    randomCard.hp = randomCard.hp < 0 ? 0 : randomCard.hp; // Убедитесь, что HP не уйдёт в минус
+    print('${randomCard.name} получил урон $damage HP. Текущее здоровье: ${randomCard.hp}');
+  }
+
+  // Проверяем, остались ли живые карты
+  if (state.player2.cards.every((card) => card.hp <= 0)) {
+    print('Все карты союзника уничтожены! Вы проиграли!');
+  }
 }
+
+}
+
