@@ -84,12 +84,13 @@ class MyLobbyState extends State<Lobby> {
                                 width: 199,
                                 height: 199,
                                 padding: const EdgeInsets.all(16),
-                                decoration: CustomDecorations.smoothMainShadowDark(51),
+                                decoration:
+                                    CustomDecorations.smoothMainShadowDark(51),
                                 child: Container(
                                   decoration: ShapeDecoration(
                                     image: const DecorationImage(
-                                      image: AssetImage('images/missing_avatar.jpg')
-                                    ),
+                                        image: AssetImage(
+                                            'images/missing_avatar.jpg')),
                                     shape: SmoothRectangleBorder(
                                       borderRadius: SmoothBorderRadius(
                                         cornerRadius: 35,
@@ -101,18 +102,17 @@ class MyLobbyState extends State<Lobby> {
                               ),
                               const SizedBox(width: 40),
                               Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    "ВЛАД ЛАХТА",
+                                    "ВЫ",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 46.9,
                                     ),
                                   ),
                                   Text(
-                                    "@lahta_vlad",
+                                    "@user_tag",
                                     style: TextStyle(
                                       color: CustomColors.greyText,
                                       fontSize: 31.15,
@@ -127,57 +127,50 @@ class MyLobbyState extends State<Lobby> {
                     ],
                   ),
                   const SizedBox(height: 51),
-                  Stack(
-                    alignment: AlignmentDirectional.topCenter,
-                    children: [
-                      const Text(
-                        "РЕЙТИНГ:",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 47.5,
-                        ),
+                  Stack(alignment: AlignmentDirectional.topCenter, children: [
+                    const Text(
+                      "РЕЙТИНГ:",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 47.5,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            "*",
-                            style: TextStyle(
-                              color: CustomColors.mainBright,
-                              fontFamily: "monospace",
-                              fontSize: 300,
-                              fontWeight: FontWeight.w900,
-                            ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "*",
+                          style: TextStyle(
+                            color: CustomColors.mainBright,
+                            fontFamily: "monospace",
+                            fontSize: 300,
+                            fontWeight: FontWeight.w900,
                           ),
-                          const SizedBox(width: 50),
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: 50),
-                            child: Animate(
-                              onPlay: (controller) =>
-                                  controller.repeat(),
-                              effects: [
-                                ShimmerEffect(
-                                    color: CustomColors.mainBright,
-                                    delay: const Duration(
-                                        milliseconds: 3000),
-                                    duration: const Duration(
-                                        milliseconds: 2000))
-                              ],
-                              child: const Text(
-                                "1500",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 183.79,
-                                ),
+                        ),
+                        const SizedBox(width: 50),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 50),
+                          child: Animate(
+                            onPlay: (controller) => controller.repeat(),
+                            effects: [
+                              ShimmerEffect(
+                                  color: CustomColors.mainBright,
+                                  delay: const Duration(milliseconds: 3000),
+                                  duration: const Duration(milliseconds: 2000))
+                            ],
+                            child: const Text(
+                              "1500",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 183.79,
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ]
-                  ),
+                        ),
+                      ],
+                    ),
+                  ]),
                 ],
               ),
             ),

@@ -62,7 +62,7 @@ class GameCubit extends Cubit<GameState> {
                   characterCards[random.nextInt(27)],
                 ], isMy: false)),
             player2: PlayerModel(
-                name: "ВЛАД ЛАХТА",
+                name: "ВЫ",
                 avatar: const AssetImage('images/missing_avatar.jpg'),
                 isOpponent: false,
                 cards: CharacterCardGameModel.fromCardList([
@@ -93,7 +93,7 @@ class GameCubit extends Cubit<GameState> {
             someoneSkipped: state.someoneSkipped,
             isChangingActive: state.isChangingActive,
             timerValue: '1:00',
-            isAttacking: state.isAttacking  && !state.myTurn,
+            isAttacking: state.isAttacking && !state.myTurn,
             gameEndState: state.gameEndState));
         return;
       }
@@ -251,8 +251,8 @@ class GameCubit extends Cubit<GameState> {
                             height: 283 + (255 * value),
                             decoration: BoxDecoration(
                                 image: DecorationImage(
-                                  image:
-                                      AssetImage(state.player2.activeCard.asset),
+                                  image: AssetImage(
+                                      state.player2.activeCard.asset),
                                 ),
                                 boxShadow: CustomBoxShadows.shadowOnDark)))
                   ]))
@@ -261,81 +261,55 @@ class GameCubit extends Cubit<GameState> {
 
   Widget attacker() {
     if (!state.isAttacking) return const SizedBox.shrink();
-    return Stack(
-      children: [
-        GestureDetector(
+    return Stack(children: [
+      GestureDetector(
           onTapDown: (_) => isAttackPreparingStarted = true,
-          onTap: () => {
-            isAttackPreparingStarted = false,
-            attackReady(false)
-          },
+          onTap: () => {isAttackPreparingStarted = false, attackReady(false)},
           child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-            child: Container(
-              color: Colors.black.withOpacity(0.5),
-            )
-          )
-        ),
-        Center(
+              filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+              ))),
+      Center(
           child: SizedBox(
-            width: 810,
-            height: 150,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+              width: 810,
+              height: 150,
+              child:
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 _button("ATTACK", CustomColors.greyLight, attack),
                 const SizedBox(width: 70),
                 state.player2.activeCard.ultimateProgress == 4
-                  ? _button("ULTIMATE", CustomColors.mainBright, ultimate)
-                  : _inactiveButton()
-              ]
-            )
-          )
-        )
-      ]
-    );
+                    ? _button("ULTIMATE", CustomColors.mainBright, ultimate)
+                    : _inactiveButton()
+              ])))
+    ]);
   }
 
   Widget _button(String txt, Color color, Function func) {
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTapDown: (_) => isAttackPreparingStarted = true,
-        onTap: () => {
-          isAttackPreparingStarted = false,
-          func()
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 150,
-          width: 370,
-          decoration: CustomDecorations.smoothColorable(51, color),
-          child: Text(
-            txt,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 50
-            )
-          )
-        )
-      )
-    );
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+            onTapDown: (_) => isAttackPreparingStarted = true,
+            onTap: () => {isAttackPreparingStarted = false, func()},
+            child: Container(
+                alignment: Alignment.center,
+                height: 150,
+                width: 370,
+                decoration: CustomDecorations.smoothColorable(51, color),
+                child: Text(txt,
+                    style:
+                        const TextStyle(color: Colors.white, fontSize: 50)))));
   }
 
   Widget _inactiveButton() {
     return Container(
-      alignment: Alignment.center,
-      height: 150,
-      width: 370,
-      decoration: CustomDecorations.smoothColorable(51, CustomColors.greyDark),
-      child: const Text(
-        "ULTIMATE",
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 50
-        )
-      )
-    );
+        alignment: Alignment.center,
+        height: 150,
+        width: 370,
+        decoration:
+            CustomDecorations.smoothColorable(51, CustomColors.greyDark),
+        child: const Text("ULTIMATE",
+            style: TextStyle(color: Colors.white, fontSize: 50)));
   }
 
   void changeActiveCard(int cardNum) {
@@ -365,7 +339,7 @@ class GameCubit extends Cubit<GameState> {
       print('Ошибка при отправке данных на сервер: $e');
     }
   }
-  
+
   void changeActiveCardAnimate(int cardNum) {
     if (state.player2.energy < 1) return;
     state.player2.energy--;
@@ -411,13 +385,12 @@ class GameCubit extends Cubit<GameState> {
     state.player1.resetEnergy();
     state.player2.resetEnergy();
     emit(GameState(
-      player1: state.player1,
-      player2: state.player2,
-      myTurn: !state.myTurn,
-      someoneSkipped: false,
-      timerValue: state.timerValue,
-      gameEndState: state.gameEndState
-    ));
+        player1: state.player1,
+        player2: state.player2,
+        myTurn: !state.myTurn,
+        someoneSkipped: false,
+        timerValue: state.timerValue,
+        gameEndState: state.gameEndState));
     sendCardsHealthData();
   }
 
@@ -453,7 +426,8 @@ class GameCubit extends Cubit<GameState> {
       print('${defendingCard.name} уничтожен!');
       changeOpponentActiveCard();
     } else {
-      print('${defendingCard.name} получил урон! Текущее здоровье: ${defendingCard.hp}');
+      print(
+          '${defendingCard.name} получил урон! Текущее здоровье: ${defendingCard.hp}');
     }
 
     attackingCard.ultimateProgress += 1;
@@ -464,16 +438,15 @@ class GameCubit extends Cubit<GameState> {
 
     // Обновляем состояние игры
     emit(GameState(
-      player1: state.player1,
-      player2: state.player2,
-      myTurn: state.myTurn,
-      someoneSkipped: state.someoneSkipped,
-      isChangingActive: state.isChangingActive,
-      timerValue: state.timerValue,
-      time: state.time,
-      isAttacking: state.isAttacking,
-      gameEndState: state.gameEndState
-    ));
+        player1: state.player1,
+        player2: state.player2,
+        myTurn: state.myTurn,
+        someoneSkipped: state.someoneSkipped,
+        isChangingActive: state.isChangingActive,
+        timerValue: state.timerValue,
+        time: state.time,
+        isAttacking: state.isAttacking,
+        gameEndState: state.gameEndState));
   }
 
   void checkOpponentCardsHealth() {
@@ -490,15 +463,15 @@ class GameCubit extends Cubit<GameState> {
     if (opponentCards.every((card) => card.hp <= 0)) {
       print('Все карты противника уничтожены! Вы победили!');
       emit(GameState(
-        player1: state.player1,
-        player2: state.player2,
-        myTurn: state.myTurn,
-        someoneSkipped: false,
-        timerValue: "-:--",
-        time: 0,
-        isAttacking: false,
-        gameEndState: 1 //Win/ if lose, zero
-      ));
+          player1: state.player1,
+          player2: state.player2,
+          myTurn: state.myTurn,
+          someoneSkipped: false,
+          timerValue: "-:--",
+          time: 0,
+          isAttacking: false,
+          gameEndState: 1 //Win/ if lose, zero
+          ));
     }
   }
 
@@ -575,9 +548,9 @@ class GameCubit extends Cubit<GameState> {
           state.player1.cards[2]; // карты защитника
       attackPlayer(attackingCard, defendingCard);
     }
-    
+
     applyRandomDamageToAlliedCard();
-    
+
     checkOpponentCardsHealth();
 
     sendCardsHealthData();
@@ -647,24 +620,26 @@ class GameCubit extends Cubit<GameState> {
   }
 
   void applyRandomDamageToAlliedCard() {
-  // Выбираем случайную карту из списка союзных карт
-  var card = state.player2.cards
-      .where((card) => card.hp > 0) // Оставляем только карты с HP > 0
-      .toList(); // Преобразуем результат в список
+    // Выбираем случайную карту из списка союзных карт
+    var card = state.player2.cards
+        .where((card) => card.hp > 0) // Оставляем только карты с HP > 0
+        .toList(); // Преобразуем результат в список
 
-  if (card.isNotEmpty) {
-    var randomCard = card[random.nextInt(card.length)]; // Выбираем случайную карту из списка
-    int damage = random.nextInt(3) + 1; // Случайное значение от 1 до 3
-    randomCard.hp -= damage;
-    randomCard.hp = randomCard.hp < 0 ? 0 : randomCard.hp; // Убедитесь, что HP не уйдёт в минус
-    print('${randomCard.name} получил урон $damage HP. Текущее здоровье: ${randomCard.hp}');
-  }
+    if (card.isNotEmpty) {
+      var randomCard = card[
+          random.nextInt(card.length)]; // Выбираем случайную карту из списка
+      int damage = random.nextInt(3) + 1; // Случайное значение от 1 до 3
+      randomCard.hp -= damage;
+      randomCard.hp = randomCard.hp < 0
+          ? 0
+          : randomCard.hp; // Убедитесь, что HP не уйдёт в минус
+      print(
+          '${randomCard.name} получил урон $damage HP. Текущее здоровье: ${randomCard.hp}');
+    }
 
-  // Проверяем, остались ли живые карты
-  if (state.player2.cards.every((card) => card.hp <= 0)) {
-    print('Все карты союзника уничтожены! Вы проиграли!');
+    // Проверяем, остались ли живые карты
+    if (state.player2.cards.every((card) => card.hp <= 0)) {
+      print('Все карты союзника уничтожены! Вы проиграли!');
+    }
   }
 }
-
-}
-
